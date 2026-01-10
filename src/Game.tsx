@@ -3,12 +3,13 @@ import { useState } from 'react';
 import './Game.css';
 
 const NUM_DICE = 5;
+const DICE_MAX_FACE = 6;
 const INITIAL_REROLLS = 2;
 
 type Value = number;
 
 const getRandomValue = (): Value => {
-    return Math.floor(Math.random() * 6 + 1);
+    return Math.floor(Math.random() * DICE_MAX_FACE + 1);
 };
 
 type Target = {
@@ -138,7 +139,10 @@ const DEFAULT_TARGETS: Target[] = [
     },
 ];
 
+const DEFAULT_INCS = 3;
+
 export const Game = () => {
+    const [incsLeft, setIncsLeft] = useState(DEFAULT_INCS);
     const [rerollsLeft, setRerollsLeft] = useState(INITIAL_REROLLS);
     const [rolls, setRolls] = useState(() => {
         return new Array(NUM_DICE).fill(0).map(getRandomValue);
@@ -175,6 +179,7 @@ export const Game = () => {
         setLocks(new Array(NUM_DICE).fill(false));
         setRolls(new Array(NUM_DICE).fill(0).map(getRandomValue));
         setRerollsLeft(INITIAL_REROLLS);
+        setIncsLeft(DEFAULT_INCS);
     };
 
     const isCompleted = targets.every(target => !!target.result);
@@ -185,6 +190,26 @@ export const Game = () => {
                 <div id="dice-list">
                     {rolls.map((value, index) => (
                         <div className="dice-and-lock" key={index}>
+                            <div className="inc-dec">
+                                <button
+                                    disabled={isCompleted || incsLeft <= 0 || value === DICE_MAX_FACE || locks[index]}
+                                    onClick={() => {
+                                        setRolls(currentRolls => currentRolls.map((rollValue, rollIndex) => index === rollIndex ? rollValue + 1 : rollValue));
+                                        setIncsLeft(currentIncsLeft => currentIncsLeft - 1);
+                                    }}
+                                >
+                                    +
+                                </button>
+                                <button
+                                    disabled={isCompleted || incsLeft <= 0 || value === 1 || locks[index]}
+                                    onClick={() => {
+                                        setRolls(currentRolls => currentRolls.map((rollValue, rollIndex) => index === rollIndex ? rollValue - 1 : rollValue));
+                                        setIncsLeft(currentIncsLeft => currentIncsLeft - 1);
+                                    }}
+                                >
+                                    -
+                                </button>
+                            </div>
                             <div className="dice-value" key={index}>{value}</div>
                             <input
                                 disabled={isCompleted}
@@ -198,8 +223,11 @@ export const Game = () => {
                         </div>
                     ))}
                 </div>
-                <div>
-                    <button disabled={isCompleted || rerollsLeft <= 0} onClick={reroll}>Re-roll ({rerollsLeft} left)</button>
+                <div id="game-actions">
+                    <div>
+                        <button disabled={isCompleted || rerollsLeft <= 0} onClick={reroll}>Re-roll ({rerollsLeft} left)</button>
+                    </div>
+                    <span>Remaining increments/decrements: {incsLeft}</span>
                 </div>
             </div>
             <div id="targets">

@@ -19,6 +19,12 @@
     gap: 4px;
 }
 
+#game-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 #targets {
     display: flex;
     flex-direction: column;
