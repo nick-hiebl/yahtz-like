@@ -1,0 +1,82 @@
+#game-board {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px;
+}
+
+#dice-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#dice-list {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid black;
+    padding: 8px;
+    gap: 4px;
+}
+
+#targets {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: start;
+    border: 1px solid black;
+    padding: 8px;
+}
+
+.dice-and-lock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+}
+
+.dice-value {
+    border: 2px solid black;
+    border-radius: 3px;
+    aspect-ratio: 1;
+    display: inline-block;
+    text-align: center;
+    height: 32px;
+    line-height: 32px;
+    font-weight: bold;
+}
+
+.target {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.target-info {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
+.target-score {
+    text-align: center;
+    border: 1px solid black;
+    aspect-ratio: 1;
+    height: 24px;
+    line-height: 24px;
+}
+
+button.target-score.placeholder {
+    color: #888;
+    cursor: pointer;
+    padding: 0;
+}
+
+.target-score.placeholder:hover {
+    color: #44f;
+    font-weight: bold;
+}
