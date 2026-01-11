@@ -1,20 +1,14 @@
-import { JSX, useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
+
+import { type Target, type Value, isNumberValue } from './types';
+import { FULL_YAHTZEE_GAME } from './yahtzee';
 
 import './Game.css';
+import { sum } from './value-utils';
 
-const NUM_DICE = 5;
-const DICE_MAX_FACE = 6;
-const INITIAL_REROLLS = 2;
-
-type NumberValue = { type: 'number'; value: number };
-
-type Value =
-    | NumberValue
-    | { type: 'wild' };
-
-function isNumberValue(value: Value): value is NumberValue {
-    return value.type === 'number';
-}
+const getRandomValue = (): Value => {
+    return { type: 'number', value: Math.floor(Math.random() * DICE_MAX_FACE + 1) };
+};
 
 const ValueComponent = (props: Value): JSX.Element => {
     if (isNumberValue(props)) {
@@ -26,144 +20,17 @@ const ValueComponent = (props: Value): JSX.Element => {
     return <span>???</span>;
 };
 
-const getRandomValue = (): Value => {
-    return { type: 'number', value: Math.floor(Math.random() * DICE_MAX_FACE + 1) };
-};
-
-type Target = {
-    id: string;
-    name: string;
-    scorer: (values: Value[]) => number;
-    result?: Value[];
-    score?: number;
-};
-
-function countValue(targetValue: number) {
-    return (values: Value[]): number => {
-        return values.filter(v => v.type === 'number' && v.value === targetValue).length * targetValue;
-    };
-}
-
-function hasNOfAKind(count: number, values: Value[]) {
-    const countMap: Record<number, number> = {};
-
-    for (const value of values) {
-        if (value.type === 'number') {
-            countMap[value.value] = (countMap[value.value] ?? 0) + 1;
-        }
-    }
-
-    return Math.max(...Object.values(countMap)) >= count;
-}
-
-function hasFullHouse(values: Value[]) {
-    const countMap: Record<number, number> = {};
-
-    for (const value of values) {
-        if (value.type === 'number') {
-            countMap[value.value] = (countMap[value.value] ?? 0) + 1;
-        }
-    }
-
-    const countSet = new Set(Object.values(countMap));
-
-    return countSet.has(2) && countSet.has(3);
-}
-
-function hasRunOfLength(length: number, values: Value[]) {
-    const simpleValues = Array.from(new Set(values.filter(isNumberValue).map(v => v.value)));
-    simpleValues.sort((a, b) => a - b);
-
-    let runLength = 0;
-    let maxLengthFound = 0;
-
-    for (let i = 0; i < simpleValues.length; i++) {
-        if (simpleValues[i] === simpleValues[i - 1] + 1) {
-            runLength += 1;
-            maxLengthFound = Math.max(runLength, maxLengthFound);
-        } else {
-            runLength = 1;
-        }
-    }
-
-    return maxLengthFound >= length;
-}
-
-function sumValues(values: Value[]) {
-    return values.reduce((total: number, value: Value) => total + (isNumberValue(value) ? value.value : 0), 0);
-}
-
-function sum(values: number[]) {
-    return values.reduce((total: number, thisNumber: number) => total + thisNumber, 0);
-}
-
-const FULL_YAHTZEE_GAME: Target[] = [
+export const INITIAL_GAME: Target[] = [
     {
-        id: 'ones',
-        name: 'Aces',
-        scorer: countValue(1),
-    },
-    {
-        id: 'twos',
-        name: 'Twos',
-        scorer: countValue(2),
-    },
-    {
-        id: 'threes',
-        name: 'Threes',
-        scorer: countValue(3),
-    },
-    {
-        id: 'fours',
-        name: 'Fours',
-        scorer: countValue(4),
-    },
-    {
-        id: 'fives',
-        name: 'Fives',
-        scorer: countValue(5),
-    },
-    {
-        id: 'sixes',
-        name: 'Sixes',
-        scorer: countValue(6),
-    },
-    {
-        id: 'chance',
-        name: 'Chance',
-        scorer: values => sumValues(values),
-    },
-    {
-        id: 'three-of-a-kind',
-        name: 'Three of a kind',
-        scorer: values => hasNOfAKind(3, values) ? sumValues(values) : 0,
-    },
-    {
-        id: 'four-of-a-kind',
-        name: 'Four of a kind',
-        scorer: values => hasNOfAKind(4, values) ? sumValues(values) : 0,
-    },
-    {
-        id: 'full-house',
-        name: 'Full house',
-        scorer: values => hasFullHouse(values) ? 25 : 0,
-    },
-    {
-        id: 'small-straight',
-        name: 'Small straight',
-        scorer: values => hasRunOfLength(4, values) ? 30 : 0,
-    },
-    {
-        id: 'long-straight',
-        name: 'Long straight',
-        scorer: values => hasRunOfLength(5, values) ? 40 : 0,
-    },
-    {
-        id: 'five-of-a-kind',
-        name: 'Yahtzee',
-        scorer: values => hasNOfAKind(5, values) ? 50 : 0,
+        id: 'max',
+        name: 'Max',
+        scorer: (values: Value[]) => Math.max(...values.filter(isNumberValue).map(v => v.value)) ?? 0,
     },
 ];
+
+const NUM_DICE = 1;
+const DICE_MAX_FACE = 6;
+const INITIAL_REROLLS = 2;
 
 const DEFAULT_INCS = 3;
 
@@ -176,8 +43,17 @@ export const Game = () => {
 
     const [locks, setLocks] = useState(new Array(NUM_DICE).fill(false));
 
+    const diceLength = rolls.length;
+    const locksLength = locks.length;
+
+    useEffect(() => {
+        if (diceLength !== locksLength) {
+            setLocks(new Array(diceLength).fill(false));
+        }
+    }, [diceLength, locksLength]);
+
     const [targets, setTargets] = useState<Target[]>(() => {
-        return FULL_YAHTZEE_GAME.slice().map(v => ({ ...v }));
+        return INITIAL_GAME.slice().map(v => ({ ...v }));
     });
 
     const reroll = () => {
