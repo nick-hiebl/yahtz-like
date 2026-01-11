@@ -82,7 +82,21 @@ button.target-score.placeholder {
     padding: 0;
 }
 
-.target-score.placeholder:hover {
+button.target-score.placeholder:hover {
     color: #44f;
     font-weight: bold;
+}
+
+.inc-dec {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.inc-dec-button {
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    line-height: 12px;
+    font-size: 12px;
 }

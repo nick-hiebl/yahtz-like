@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { JSX, useState } from 'react';
 
 import './Game.css';
 
@@ -6,10 +6,28 @@ const NUM_DICE = 5;
 const DICE_MAX_FACE = 6;
 const INITIAL_REROLLS = 2;
 
-type Value = number;
+type NumberValue = { type: 'number'; value: number };
+
+type Value =
+    | NumberValue
+    | { type: 'wild' };
+
+function isNumberValue(value: Value): value is NumberValue {
+    return value.type === 'number';
+}
+
+const ValueComponent = (props: Value): JSX.Element => {
+    if (isNumberValue(props)) {
+        return <span>{props.value}</span>;
+    } else if (props.type === 'wild') {
+        return <span>W</span>;
+    }
+
+    return <span>???</span>;
+};
 
 const getRandomValue = (): Value => {
-    return Math.floor(Math.random() * DICE_MAX_FACE + 1);
+    return { type: 'number', value: Math.floor(Math.random() * DICE_MAX_FACE + 1) };
 };
 
 type Target = {
@@ -20,27 +38,31 @@ type Target = {
     score?: number;
 };
 
-function countValue(targetValue: Value) {
+function countValue(targetValue: number) {
     return (values: Value[]): number => {
-        return values.filter(v => v === targetValue).length * targetValue;
+        return values.filter(v => v.type === 'number' && v.value === targetValue).length * targetValue;
     };
 }
 
 function hasNOfAKind(count: number, values: Value[]) {
-    const countMap: Record<Value, number> = {};
+    const countMap: Record<number, number> = {};
 
     for (const value of values) {
-        countMap[value] = (countMap[value] ?? 0) + 1;
+        if (value.type === 'number') {
+            countMap[value.value] = (countMap[value.value] ?? 0) + 1;
+        }
     }
 
     return Math.max(...Object.values(countMap)) >= count;
 }
 
 function hasFullHouse(values: Value[]) {
-    const countMap: Record<Value, number> = {};
+    const countMap: Record<number, number> = {};
 
     for (const value of values) {
-        countMap[value] = (countMap[value] ?? 0) + 1;
+        if (value.type === 'number') {
+            countMap[value.value] = (countMap[value.value] ?? 0) + 1;
+        }
     }
 
     const countSet = new Set(Object.values(countMap));
@@ -49,7 +71,7 @@ function hasFullHouse(values: Value[]) {
 }
 
 function hasRunOfLength(length: number, values: Value[]) {
-    const simpleValues = Array.from(new Set(values));
+    const simpleValues = Array.from(new Set(values.filter(isNumberValue).map(v => v.value)));
     simpleValues.sort((a, b) => a - b);
 
     let runLength = 0;
@@ -67,11 +89,15 @@ function hasRunOfLength(length: number, values: Value[]) {
     return maxLengthFound >= length;
 }
 
-function sum(values: Value[]) {
-    return values.reduce((a, b) => a + b, 0);
+function sumValues(values: Value[]) {
+    return values.reduce((total: number, value: Value) => total + (isNumberValue(value) ? value.value : 0), 0);
 }
 
-const DEFAULT_TARGETS: Target[] = [
+function sum(values: number[]) {
+    return values.reduce((total: number, thisNumber: number) => total + thisNumber, 0);
+}
+
+const FULL_YAHTZEE_GAME: Target[] = [
     {
         id: 'ones',
         name: 'Aces',
@@ -105,17 +131,17 @@ const DEFAULT_TARGETS: Target[] = [
     {
         id: 'chance',
         name: 'Chance',
-        scorer: values => sum(values),
+        scorer: values => sumValues(values),
     },
     {
         id: 'three-of-a-kind',
         name: 'Three of a kind',
-        scorer: values => hasNOfAKind(3, values) ? sum(values) : 0,
+        scorer: values => hasNOfAKind(3, values) ? sumValues(values) : 0,
     },
     {
         id: 'four-of-a-kind',
         name: 'Four of a kind',
-        scorer: values => hasNOfAKind(4, values) ? sum(values) : 0,
+        scorer: values => hasNOfAKind(4, values) ? sumValues(values) : 0,
     },
     {
         id: 'full-house',
@@ -134,7 +160,7 @@ const DEFAULT_TARGETS: Target[] = [
     },
     {
         id: 'five-of-a-kind',
-        name: 'Five of a kind',
+        name: 'Yahtzee',
         scorer: values => hasNOfAKind(5, values) ? 50 : 0,
     },
 ];
@@ -144,14 +170,14 @@ const DEFAULT_INCS = 3;
 export const Game = () => {
     const [incsLeft, setIncsLeft] = useState(DEFAULT_INCS);
     const [rerollsLeft, setRerollsLeft] = useState(INITIAL_REROLLS);
-    const [rolls, setRolls] = useState(() => {
+    const [rolls, setRolls] = useState<Value[]>(() => {
         return new Array(NUM_DICE).fill(0).map(getRandomValue);
     });
 
     const [locks, setLocks] = useState(new Array(NUM_DICE).fill(false));
 
-    const [targets, setTargets] = useState(() => {
-        return DEFAULT_TARGETS.slice().map(v => ({ ...v }));
+    const [targets, setTargets] = useState<Target[]>(() => {
+        return FULL_YAHTZEE_GAME.slice().map(v => ({ ...v }));
     });
 
     const reroll = () => {
@@ -192,25 +218,37 @@ export const Game = () => {
                         <div className="dice-and-lock" key={index}>
                             <div className="inc-dec">
                                 <button
-                                    disabled={isCompleted || incsLeft <= 0 || value === DICE_MAX_FACE || locks[index]}
+                                    className="inc-dec-button"
+                                    disabled={isCompleted || incsLeft <= 0 || !isNumberValue(value) || value.value === DICE_MAX_FACE || locks[index]}
                                     onClick={() => {
-                                        setRolls(currentRolls => currentRolls.map((rollValue, rollIndex) => index === rollIndex ? rollValue + 1 : rollValue));
+                                        if (!isNumberValue(value)) {
+                                            return;
+                                        }
+
+                                        setRolls(currentRolls => currentRolls.map((rollValue, rollIndex) => index === rollIndex ? { ...value, value: value.value + 1 } : rollValue));
                                         setIncsLeft(currentIncsLeft => currentIncsLeft - 1);
                                     }}
                                 >
                                     +
                                 </button>
                                 <button
-                                    disabled={isCompleted || incsLeft <= 0 || value === 1 || locks[index]}
+                                    className="inc-dec-button"
+                                    disabled={isCompleted || incsLeft <= 0 || !isNumberValue(value) || value.value === 1 || locks[index]}
                                     onClick={() => {
-                                        setRolls(currentRolls => currentRolls.map((rollValue, rollIndex) => index === rollIndex ? rollValue - 1 : rollValue));
+                                        if (!isNumberValue(value)) {
+                                            return;
+                                        }
+
+                                        setRolls(currentRolls => currentRolls.map((rollValue, rollIndex) => index === rollIndex ? { ...value, value: value.value - 1 } : rollValue));
                                         setIncsLeft(currentIncsLeft => currentIncsLeft - 1);
                                     }}
                                 >
-                                    -
+                                    –
                                 </button>
                             </div>
-                            <div className="dice-value" key={index}>{value}</div>
+                            <div className="dice-value" key={index}>
+                                <ValueComponent {...value} />
+                            </div>
                             <input
                                 disabled={isCompleted}
                                 checked={locks[index]}
@@ -234,7 +272,7 @@ export const Game = () => {
                 {targets.map(target => (
                     <div className="target" key={target.id}>
                         <div className="target-info">
-                            {target.score ? (
+                            {target.result ? (
                                 <div className="target-score">{target.score}</div>
                             ) : (
                                 <button className="target-score placeholder" onClick={() => lockTarget(target.id)}>
@@ -246,7 +284,9 @@ export const Game = () => {
                         {target.result && (
                             <div>
                                 {target.result.map((value, index) => (
-                                    <div className="dice-value" key={index}>{value}</div>
+                                    <div className="dice-value" key={index}>
+                                        <ValueComponent {...value} />
+                                    </div>
                                 ))}
                             </div>
                         )}
