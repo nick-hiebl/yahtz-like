@@ -100,6 +100,16 @@ export const Game = (props: GameProps) => {
 
     const isCompleted = targets.every(target => !!target.result);
 
+    const onComplete = props.onComplete;
+
+    useEffect(() => {
+        if (!isCompleted) {
+            return;
+        }
+
+        onComplete(sum(targets.map(v => v.score ?? 0)));
+    }, [onComplete, isCompleted, targets]);
+
     return (
         <div id="game-board">
             <div id="dice-box">
@@ -139,22 +149,24 @@ export const Game = (props: GameProps) => {
                                 </div>
                             )}
                             <ValueComponent {...value} />
-                            <input
-                                disabled={isCompleted}
-                                checked={locks[index]}
-                                type="checkbox"
-                                onChange={e => {
-                                    const isChecked = e.currentTarget.checked;
-                                    setLocks(current => current.map((lockValue, lockIndex) => lockIndex === index ? isChecked : lockValue));
-                                }}
-                            />
+                            {props.elements.length > 1 && (
+                                <input
+                                    disabled={isCompleted}
+                                    checked={locks[index]}
+                                    type="checkbox"
+                                    onChange={e => {
+                                        const isChecked = e.currentTarget.checked;
+                                        setLocks(current => current.map((lockValue, lockIndex) => lockIndex === index ? isChecked : lockValue));
+                                    }}
+                                />
+                            )}
                         </div>
                     ))}
                 </div>
                 <div id="game-actions">
                     {props.numRerolls > 0 && (
                         <div>
-                            <button disabled={isCompleted || rerollsLeft <= 0} onClick={reroll}>Re-roll ({rerollsLeft} left)</button>
+                            <button disabled={isCompleted || rerollsLeft <= 0 || locks.every(v => v)} onClick={reroll}>Re-roll ({rerollsLeft} left)</button>
                         </div>
                     )}
                     {props.numIncrements > 0 && (
@@ -192,13 +204,6 @@ export const Game = (props: GameProps) => {
                             <div className="target-score placeholder">{sum(targets.map(target => target.score ?? 0))}</div>
                         )}
                         <strong>Total</strong>
-                        {isCompleted && (
-                            <button onClick={() => {
-                                props.onComplete(sum(targets.map(v => v.score ?? 0)));
-                            }}>
-                                Lock in
-                            </button>
-                        )}
                     </div>
                 </div>
             </div>
