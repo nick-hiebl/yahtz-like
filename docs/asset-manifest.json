@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/yahtz-like/static/css/main.aa0e6e51.css",
-    "main.js": "/yahtz-like/static/js/main.74b2bfaf.js",
+    "main.css": "/yahtz-like/static/css/main.271a9a3f.css",
+    "main.js": "/yahtz-like/static/js/main.5d15a563.js",
     "index.html": "/yahtz-like/index.html",
-    "main.aa0e6e51.css.map": "/yahtz-like/static/css/main.aa0e6e51.css.map",
-    "main.74b2bfaf.js.map": "/yahtz-like/static/js/main.74b2bfaf.js.map"
+    "main.271a9a3f.css.map": "/yahtz-like/static/css/main.271a9a3f.css.map",
+    "main.5d15a563.js.map": "/yahtz-like/static/js/main.5d15a563.js.map"
   },
   "entrypoints": [
-    "static/css/main.aa0e6e51.css",
-    "static/js/main.74b2bfaf.js"
+    "static/css/main.271a9a3f.css",
+    "static/js/main.5d15a563.js"
   ]
 }
