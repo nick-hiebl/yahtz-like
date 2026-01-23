@@ -1,8 +1,10 @@
 ul {
     display: flex;
+    flex-direction: column;
     gap: 4px;
     margin: 0;
     padding: 0;
+    justify-content: center;
 }
 
 ul.inline {

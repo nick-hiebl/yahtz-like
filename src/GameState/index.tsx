@@ -7,18 +7,20 @@ import { GameArguments } from '../Game/types';
 
 import './style.css';
 
-export const INITIAL_GAME: Target[] = [
-    {
+const TARGETS: Record<string, Target & { cost: number }> = {
+    MAX: {
         id: 'max',
         name: 'Max',
         scorer: (values: Value[]) => Math.max(...values.filter(isNumberValue).map(v => v.value)) ?? 0,
+        cost: -1,
     },
-    {
+    MIN: {
         id: 'min',
         name: 'Min',
         scorer: (values: Value[]) => Math.min(...values.filter(isNumberValue).map(v => v.value)) ?? 0,
+        cost: 11,
     },
-];
+};
 
 const ElementComponent = ({ element }: { element: Element }) => {
     if (element.type === 'dice') {
@@ -34,12 +36,13 @@ export const GameStateComponent = () => {
     });
     const [numRerolls, setRerolls] = useState(1);
     const [numIncrements, setIncrements] = useState(0);
+    const [targets, setTargets] = useState<Target[]>([TARGETS.MAX]);
 
     const [gameState, setGameState] = useState<GameArguments & { gameKey: string }>({
         elements,
         numRerolls,
         numIncrements,
-        targets: INITIAL_GAME,
+        targets,
         gameKey: Math.random().toString(),
     });
 
@@ -70,7 +73,7 @@ export const GameStateComponent = () => {
                         elements,
                         numRerolls,
                         numIncrements,
-                        targets: INITIAL_GAME,
+                        targets,
                         gameKey: Math.random().toString(),
                     });
                 }}
@@ -122,6 +125,21 @@ export const GameStateComponent = () => {
                 >
                     Buy increment (${nextIncrementCost})
                 </button>
+                <h3>Targets</h3>
+                <ul>
+                    {Object.entries(TARGETS).filter(([_, target]) => target.cost > 0).map(([key, target]) => (
+                        <button
+                            key={key}
+                            disabled={money < target.cost || targets.map(t => t.id).includes(target.id)}
+                            onClick={() => {
+                                setMoney(current => current - target.cost);
+                                setTargets(current => current.concat(target));
+                            }}
+                        >
+                            {target.name} (${target.cost})
+                        </button>
+                    ))}
+                </ul>
             </div>
         </div>
     );
