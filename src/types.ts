@@ -15,3 +15,14 @@ export type Target = {
     result?: Value[];
     score?: number;
 };
+
+export type Dice = {
+    type: 'dice';
+    values: Value[];
+    maxValue: NumberValue;
+    getValue: () => Value;
+    increment: (current: Value) => Value;
+    decrement: (current: Value) => Value;
+};
+
+export type Element = Dice;

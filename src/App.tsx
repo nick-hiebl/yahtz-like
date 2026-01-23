@@ -1,11 +1,11 @@
-import { Game } from './Game';
+import { GameStateComponent } from './GameState';
 
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <Game />
+      <GameStateComponent />
     </div>
   );
 }

@@ -1,4 +1,16 @@
-import { type Value, isNumberValue } from './types';
+import { NumberValue, type Value, isNumberValue } from './types';
+
+export function isValueEqual(value: Value, value2: Value): boolean {
+    if (value.type !== value2.type) {
+        return false;
+    }
+
+    if (value.type === 'number') {
+        return value.value === (value2 as NumberValue).value;
+    }
+
+    return true;
+};
 
 export function countValue(targetValue: number) {
     return (values: Value[]): number => {
