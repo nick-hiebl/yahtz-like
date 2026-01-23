@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { type Element, type Target, type Value, isNumberValue } from '../types';
 import { isValueEqual, sum } from '../value-utils';
@@ -138,9 +138,7 @@ export const Game = (props: GameProps) => {
                                     </button>
                                 </div>
                             )}
-                            <div className="dice-value" key={index}>
-                                <ValueComponent {...value} />
-                            </div>
+                            <ValueComponent {...value} />
                             <input
                                 disabled={isCompleted}
                                 checked={locks[index]}
@@ -180,9 +178,7 @@ export const Game = (props: GameProps) => {
                         {target.result && (
                             <div>
                                 {target.result.map((value, index) => (
-                                    <div className="dice-value" key={index}>
-                                        <ValueComponent {...value} />
-                                    </div>
+                                    <ValueComponent key={index} {...value} />
                                 ))}
                             </div>
                         )}
