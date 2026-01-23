@@ -5,6 +5,10 @@
     padding: 8px;
 }
 
+#game-board[data-completed="true"] {
+    opacity: 40%;
+}
+
 #dice-box {
     display: flex;
     flex-direction: column;

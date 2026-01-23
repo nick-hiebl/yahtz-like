@@ -111,7 +111,7 @@ export const Game = (props: GameProps) => {
     }, [onComplete, isCompleted, targets]);
 
     return (
-        <div id="game-board">
+        <div id="game-board" data-completed={isCompleted}>
             <div id="dice-box">
                 <div id="dice-list">
                     {rolls.map(({ element, value }, index) => (
