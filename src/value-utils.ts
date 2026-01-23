@@ -1,5 +1,9 @@
 import { NumberValue, type Value, isNumberValue } from './types';
 
+export function countMatchingPredicate<T>(list: T[], predicate: (t: T) => void, requiredNumber: number) {
+    return list.filter(predicate).length >= requiredNumber;
+}
+
 export function isValueEqual(value: Value, value2: Value): boolean {
     if (value.type !== value2.type) {
         return false;
@@ -14,7 +18,13 @@ export function isValueEqual(value: Value, value2: Value): boolean {
 
 export function countValue(targetValue: number) {
     return (values: Value[]): number => {
-        return values.filter(v => v.type === 'number' && v.value === targetValue).length * targetValue;
+        return values.filter(v => v.type === 'wild' || (v.type === 'number' && v.value === targetValue)).length;
+    };
+}
+
+export function countSymbol(targetSymbol: string) {
+    return (values: Value[]): number => {
+        return values.filter(v => v.type === 'wild' || (v.type === 'symbol' && v.value === targetSymbol)).length;
     };
 }
 

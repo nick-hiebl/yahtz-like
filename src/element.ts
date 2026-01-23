@@ -1,4 +1,4 @@
-import type { Dice, Value } from './types';
+import type { Coin, Dice, Value } from './types';
 
 const getRandomListItem = <T>(items: T[]): T => {
     return items[Math.floor(Math.random() * items.length)];
@@ -30,5 +30,17 @@ export const createDice = (maxValue: number): Dice => {
         increment,
         decrement,
         getValue: () => getRandomListItem(values),
+    };
+};
+
+export const createCoin = (odds = 0.5, values: ['W' | string, 'W' | string] = ['H', 'T']): Coin => {
+    const realValues: Value[] = values.map(v => v === 'W' ? { type: 'wild' } : { type: 'symbol', value: v });
+    return {
+        type: 'coin',
+        values: realValues,
+        getValue: () => {
+            if (Math.random() < odds) return realValues[0];
+            return realValues[1];
+        },
     };
 };

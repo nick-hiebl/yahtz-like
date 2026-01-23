@@ -10,27 +10,27 @@ export const FULL_YAHTZEE_GAME: Target[] = [
     {
         id: 'twos',
         name: 'Twos',
-        scorer: countValue(2),
+        scorer: vs => countValue(2)(vs) * 2,
     },
     {
         id: 'threes',
         name: 'Threes',
-        scorer: countValue(3),
+        scorer: vs => countValue(3)(vs) * 3,
     },
     {
         id: 'fours',
         name: 'Fours',
-        scorer: countValue(4),
+        scorer: vs => countValue(4)(vs) * 4,
     },
     {
         id: 'fives',
         name: 'Fives',
-        scorer: countValue(5),
+        scorer: vs => countValue(5)(vs) * 5,
     },
     {
         id: 'sixes',
         name: 'Sixes',
-        scorer: countValue(6),
+        scorer: vs => countValue(6)(vs) * 6,
     },
     {
         id: 'chance',

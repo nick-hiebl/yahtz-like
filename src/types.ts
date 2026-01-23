@@ -1,7 +1,9 @@
 export type NumberValue = { type: 'number'; value: number };
+export type SymbolValue = { type: 'symbol'; value: string };
 
 export type Value =
     | NumberValue
+    | SymbolValue
     | { type: 'wild' };
 
 export function isNumberValue(value: Value): value is NumberValue {
@@ -12,7 +14,7 @@ export type Target = {
     id: string;
     name: string;
     scorer: (values: Value[]) => number;
-    result?: Value[];
+    result?: Roll[];
     score?: number;
 };
 
@@ -25,4 +27,12 @@ export type Dice = {
     decrement: (current: Value) => Value;
 };
 
-export type Element = Dice;
+export type Coin = {
+    type: 'coin';
+    values: Value[];
+    getValue: () => Value;
+};
+
+export type Element = Dice | Coin;
+
+export type Roll = { element: Element; value: Value };

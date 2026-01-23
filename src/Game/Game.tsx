@@ -1,20 +1,28 @@
 import { useEffect, useState } from 'react';
 
-import { type Element, type Target, type Value, isNumberValue } from '../types';
+import { type Element, type Roll, type Target, type Value, isNumberValue } from '../types';
 import { isValueEqual, sum } from '../value-utils';
 
 import type { GameArguments } from './types';
 
 import './Game.css';
 
-export const ValueComponent = (props: Value) => {
-    if (isNumberValue(props)) {
+export const ValueComponent = ({ value, type }: { value: Value; type: Element['type'] }) => {
+    if (type === 'coin') {
         return (
-            <div className="dice-value">
-                <span>{props.value}</span>
+            <div className="coin-value">
+                <span>{value.type === 'wild' ? 'W' : value.value}</span>
             </div>
         );
-    } else if (props.type === 'wild') {
+    }
+
+    if (isNumberValue(value)) {
+        return (
+            <div className="dice-value">
+                <span>{value.value}</span>
+            </div>
+        );
+    } else if (value.type === 'wild') {
         return (
             <div className="dice-value">
                 <span>W</span>
@@ -28,8 +36,6 @@ export const ValueComponent = (props: Value) => {
         </div>
     );
 };
-
-type Roll = { element: Element; value: Value };
 
 const getRoll = (element: Element): Roll => ({ element, value: element.getValue() });
 
@@ -83,7 +89,7 @@ export const Game = (props: GameProps) => {
 
             return {
                 ...target,
-                result: values,
+                result: rolls,
                 score: target.scorer(values),
             };
         }));
@@ -148,7 +154,7 @@ export const Game = (props: GameProps) => {
                                     </button>
                                 </div>
                             )}
-                            <ValueComponent {...value} />
+                            <ValueComponent type={element.type} value={value} />
                             {props.elements.length > 1 && (
                                 <input
                                     disabled={isCompleted}
@@ -189,8 +195,8 @@ export const Game = (props: GameProps) => {
                         </div>
                         {target.result && (
                             <div>
-                                {target.result.map((value, index) => (
-                                    <ValueComponent key={index} {...value} />
+                                {target.result.map((roll, index) => (
+                                    <ValueComponent key={index} type={roll.element.type} value={roll.value} />
                                 ))}
                             </div>
                         )}
