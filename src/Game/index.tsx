@@ -8,10 +8,18 @@ import type { GameArguments } from './types';
 
 import './Game.css';
 
-export const ValueComponent = ({ value, type }: { value: Value; type: Element['type'] }) => {
+type ValueComponentProps = {
+    value: Value;
+    type: Element['type'];
+    size?: 'medium' | 'small';
+};
+
+export const ValueComponent = ({ value, size, type }: ValueComponentProps) => {
+    const sizeClasses = size === 'small' ? 'small' : '';
+
     if (type === 'coin') {
         return (
-            <div className="coin-value">
+            <div className={`coin-value ${sizeClasses}`}>
                 <span>{value.type === 'wild' ? 'W' : value.value}</span>
             </div>
         );
@@ -19,20 +27,20 @@ export const ValueComponent = ({ value, type }: { value: Value; type: Element['t
 
     if (isNumberValue(value)) {
         return (
-            <div className="dice-value">
+            <div className={`dice-value ${sizeClasses}`}>
                 <span>{value.value}</span>
             </div>
         );
     } else if (value.type === 'wild') {
         return (
-            <div className="dice-value">
+            <div className={`dice-value ${sizeClasses}`}>
                 <span>W</span>
             </div>
         );
     }
 
     return (
-        <div className="dice-value">
+        <div className={`dice-value ${sizeClasses}`}>
             <span>???</span>
         </div>
     );
@@ -47,7 +55,7 @@ type GameProps = GameArguments & {
     setAutomationOn: (state: boolean) => void;
 };
 
-const AUTOMATION_DURATION = 5_000;
+const AUTOMATION_DURATION = 1_000;
 
 export const Game = (props: GameProps) => {
     const {
@@ -241,9 +249,9 @@ export const Game = (props: GameProps) => {
                                 <div>{target.name}</div>
                             </div>
                             {target.result && (
-                                <div className="target-result">
+                                <div className="row gap-4px">
                                     {target.result.map((roll, index) => (
-                                        <ValueComponent key={index} type={roll.element.type} value={roll.value} />
+                                        <ValueComponent key={index} type={roll.element.type} value={roll.value} size="small" />
                                     ))}
                                 </div>
                             )}

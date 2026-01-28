@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Game, ValueComponent } from '../Game';
 import { GameArguments } from '../Game/types';
@@ -52,6 +52,8 @@ const TARGETS: Record<string, Target & TargetShopInfo> = {
 const WILD_COIN_COST = 40;
 const AUTOMATION_COST = 10;
 
+const RESET_TIMEOUT = 1_000;
+
 const ElementComponent = ({ element }: { element: Element }) => {
     if (element.type === 'dice') {
         return <ValueComponent type="dice" value={element.maxValue} />
@@ -73,6 +75,7 @@ export const GameStateComponent = () => {
     const [numRerolls, setRerolls] = useState(1);
     const [numIncrements, setIncrements] = useState(0);
     const [targets, setTargets] = useState<Target[]>([TARGETS.MAX]);
+    const [autoReset, setAutoReset] = useState(false);
 
     const [gameState, setGameState] = useState<GameArguments & { gameKey: string }>({
         elements,
@@ -105,6 +108,31 @@ export const GameStateComponent = () => {
             return target.buyCondition(elements);
         });
 
+    const resetGame = useCallback(() => {
+        setComplete(false);
+        setGameState({
+            elements,
+            numIncrements,
+            numRerolls,
+            targets,
+            gameKey: Math.random().toString(),
+        });
+    }, [elements, numIncrements, numRerolls, targets]);
+
+    useEffect(() => {
+        if (!autoReset || !isComplete) {
+            return;
+        }
+
+        const t = setTimeout(() => {
+            resetGame();
+        }, RESET_TIMEOUT);
+
+        return () => {
+            clearTimeout(t);
+        };
+    }, [autoReset, isComplete, resetGame]);
+
     return (
         <div className="column gap-8px">
             <Game
@@ -119,21 +147,20 @@ export const GameStateComponent = () => {
                 <button
                     disabled={!isComplete}
                     onClick={() => {
-                        setComplete(false);
-                        setGameState({
-                            elements,
-                            numRerolls,
-                            numIncrements,
-                            targets,
-                            gameKey: Math.random().toString(),
-                        });
+                        resetGame();
                     }}
                 >
                     Start game
                 </button>
                 {automationEnabled && (
                     <label>
-                        <input type="checkbox" />
+                        <input
+                            type="checkbox"
+                            checked={autoReset}
+                            onChange={e => {
+                                setAutoReset(e.currentTarget.checked);
+                            }}
+                        />
                         Auto-reset?
                     </label>
                 )}
@@ -153,7 +180,7 @@ export const GameStateComponent = () => {
                 <div>Re-rolls: {numRerolls}</div>
                 <div>Increments/decrements: {numIncrements}</div>
             </div>
-            <div id="shop">
+            <div id="shop" className="column gap-8px">
                 <h2>Shop</h2>
                 <div>Money: ${money}</div>
                 <div className="row gap-4px">

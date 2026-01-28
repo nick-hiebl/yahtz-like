@@ -52,26 +52,26 @@
     padding: 4px;
 }
 
-.dice-value {
+.dice-value, .coin-value {
     border: 2px solid black;
     border-radius: 3px;
     aspect-ratio: 1;
     display: inline-block;
     text-align: center;
     height: 32px;
-    line-height: 32px;
+    line-height: 28px;
     font-weight: bold;
+    box-sizing: border-box;
 }
 
 .coin-value {
-    border: 2px solid black;
     border-radius: 50%;
-    aspect-ratio: 1;
-    display: inline-block;
-    text-align: center;
-    height: 32px;
-    line-height: 32px;
-    font-weight: bold;
+}
+
+.dice-value.small, .coin-value.small {
+    height: 24px;
+    width: 24px;
+    line-height: 20px;
 }
 
 .target {
@@ -90,6 +90,7 @@
 }
 
 .target-score {
+    box-sizing: border-box;
     text-align: center;
     border: 1px solid black;
     aspect-ratio: 1;
@@ -106,13 +107,6 @@ button.target-score.placeholder {
 button.target-score.placeholder:hover {
     color: #44f;
     font-weight: bold;
-}
-
-.target-result {
-    display: flex;
-    flex-direction: row;
-    gap: 4px;
-    transform: scale(0.75);
 }
 
 .inc-dec {
