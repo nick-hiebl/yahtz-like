@@ -50,6 +50,7 @@ const TARGETS: Record<string, Target & TargetShopInfo> = {
 };
 
 const WILD_COIN_COST = 40;
+const AUTOMATION_COST = 10;
 
 const ElementComponent = ({ element }: { element: Element }) => {
     if (element.type === 'dice') {
@@ -67,6 +68,8 @@ export const GameStateComponent = () => {
     const [elements, setElements] = useState<Element[]>(() => {
         return new Array(INITIAL_DICE).fill(0).map(() => createDice(6));
     });
+    const [automationEnabled, setAutomationEnabled] = useState(false);
+    const [automationOn, setAutomationOn] = useState(false);
     const [numRerolls, setRerolls] = useState(1);
     const [numIncrements, setIncrements] = useState(0);
     const [targets, setTargets] = useState<Target[]>([TARGETS.MAX]);
@@ -108,7 +111,9 @@ export const GameStateComponent = () => {
                 key={gameState.gameKey}
                 {...gameState}
                 onComplete={onComplete}
-                automationEnabled
+                automationEnabled={automationEnabled}
+                automationOn={automationEnabled && automationOn}
+                setAutomationOn={setAutomationOn}
             />
             <button
                 disabled={!isComplete}
@@ -187,6 +192,15 @@ export const GameStateComponent = () => {
                     }}
                 >
                     Buy increment (${nextIncrementCost})
+                </button>
+                <button
+                    disabled={money < AUTOMATION_COST || automationEnabled}
+                    onClick={() => {
+                        setMoney(current => current - AUTOMATION_COST);
+                        setAutomationEnabled(true);
+                    }}
+                >
+                    Buy automation (${AUTOMATION_COST})
                 </button>
                 {buyableTargets.length > 0 && (
                     <div>

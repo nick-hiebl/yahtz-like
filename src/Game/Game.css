@@ -1,3 +1,9 @@
+.game-container {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+}
+
 #game-board {
     display: flex;
     flex-direction: row;
