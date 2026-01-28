@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 
-import { Game, ValueComponent } from '../Game/Game';
+import { Game, ValueComponent } from '../Game';
+import { GameArguments } from '../Game/types';
 import { createCoin, createDice } from '../element';
 import { type Element, type Target, isNumberValue } from '../types';
 import { countMatchingPredicate, countSymbol, sum } from '../value-utils';
-import { GameArguments } from '../Game/types';
 
 import './style.css';
 
@@ -106,7 +106,7 @@ export const GameStateComponent = () => {
         });
 
     return (
-        <div>
+        <div className="column gap-8px">
             <Game
                 key={gameState.gameKey}
                 {...gameState}
@@ -115,24 +115,32 @@ export const GameStateComponent = () => {
                 automationOn={automationEnabled && automationOn}
                 setAutomationOn={setAutomationOn}
             />
-            <button
-                disabled={!isComplete}
-                onClick={() => {
-                    setComplete(false);
-                    setGameState({
-                        elements,
-                        numRerolls,
-                        numIncrements,
-                        targets,
-                        gameKey: Math.random().toString(),
-                    });
-                }}
-            >
-                Start game
-            </button>
-            <div id="inventory">
+            <div className="row">
+                <button
+                    disabled={!isComplete}
+                    onClick={() => {
+                        setComplete(false);
+                        setGameState({
+                            elements,
+                            numRerolls,
+                            numIncrements,
+                            targets,
+                            gameKey: Math.random().toString(),
+                        });
+                    }}
+                >
+                    Start game
+                </button>
+                {automationEnabled && (
+                    <label>
+                        <input type="checkbox" />
+                        Auto-reset?
+                    </label>
+                )}
+            </div>
+            <div id="inventory" className="column gap-8px">
                 <h2>Inventory</h2>
-                <div>
+                <div className="column gap-4px">
                     Elements:
                     <ul className="inline">
                         {elements.map((element, index) => (
@@ -148,60 +156,62 @@ export const GameStateComponent = () => {
             <div id="shop">
                 <h2>Shop</h2>
                 <div>Money: ${money}</div>
-                <button
-                    disabled={money < nextDiceCost}
-                    onClick={() => {
-                        setMoney(current => current - nextDiceCost);
-                        setElements(elements => elements.concat(createDice(6)));
-                    }}
-                >
-                    Buy dice (${nextDiceCost})
-                </button>
-                <button
-                    disabled={money < nextCoinCost}
-                    onClick={() => {
-                        setMoney(current => current - nextCoinCost);
-                        setElements(elements => elements.concat(createCoin()));
-                    }}
-                >
-                    Buy coin (${nextCoinCost})
-                </button>
-                <button
-                    disabled={money < WILD_COIN_COST}
-                    onClick={() => {
-                        setMoney(current => current - WILD_COIN_COST);
-                        setElements(elements => elements.concat(createCoin(0.5, ['W', 'T'])));
-                    }}
-                >
-                    Buy wild coin (${WILD_COIN_COST})
-                </button>
-                <button
-                    disabled={money < nextRerollCost}
-                    onClick={() => {
-                        setMoney(current => current - nextRerollCost);
-                        setRerolls(current => current + 1);
-                    }}
-                >
-                    Buy reroll (${nextRerollCost})
-                </button>
-                <button
-                    disabled={money < nextIncrementCost}
-                    onClick={() => {
-                        setMoney(current => current - nextIncrementCost);
-                        setIncrements(current => current + 1);
-                    }}
-                >
-                    Buy increment (${nextIncrementCost})
-                </button>
-                <button
-                    disabled={money < AUTOMATION_COST || automationEnabled}
-                    onClick={() => {
-                        setMoney(current => current - AUTOMATION_COST);
-                        setAutomationEnabled(true);
-                    }}
-                >
-                    Buy automation (${AUTOMATION_COST})
-                </button>
+                <div className="row gap-4px">
+                    <button
+                        disabled={money < nextDiceCost}
+                        onClick={() => {
+                            setMoney(current => current - nextDiceCost);
+                            setElements(elements => elements.concat(createDice(6)));
+                        }}
+                    >
+                        Buy dice (${nextDiceCost})
+                    </button>
+                    <button
+                        disabled={money < nextCoinCost}
+                        onClick={() => {
+                            setMoney(current => current - nextCoinCost);
+                            setElements(elements => elements.concat(createCoin()));
+                        }}
+                    >
+                        Buy coin (${nextCoinCost})
+                    </button>
+                    <button
+                        disabled={money < WILD_COIN_COST}
+                        onClick={() => {
+                            setMoney(current => current - WILD_COIN_COST);
+                            setElements(elements => elements.concat(createCoin(0.5, ['W', 'T'])));
+                        }}
+                    >
+                        Buy wild coin (${WILD_COIN_COST})
+                    </button>
+                    <button
+                        disabled={money < nextRerollCost}
+                        onClick={() => {
+                            setMoney(current => current - nextRerollCost);
+                            setRerolls(current => current + 1);
+                        }}
+                    >
+                        Buy reroll (${nextRerollCost})
+                    </button>
+                    <button
+                        disabled={money < nextIncrementCost}
+                        onClick={() => {
+                            setMoney(current => current - nextIncrementCost);
+                            setIncrements(current => current + 1);
+                        }}
+                    >
+                        Buy increment (${nextIncrementCost})
+                    </button>
+                    <button
+                        disabled={money < AUTOMATION_COST || automationEnabled}
+                        onClick={() => {
+                            setMoney(current => current - AUTOMATION_COST);
+                            setAutomationEnabled(true);
+                        }}
+                    >
+                        Buy automation ({automationEnabled ? 'Bought' : `$${AUTOMATION_COST}`})
+                    </button>
+                </div>
                 {buyableTargets.length > 0 && (
                     <div>
                         <h3>Targets</h3>
