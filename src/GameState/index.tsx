@@ -61,9 +61,11 @@ const ElementComponent = ({ element }: { element: Element }) => {
     return <span>???</span>;
 };
 
+const INITIAL_DICE = 1;
+
 export const GameStateComponent = () => {
     const [elements, setElements] = useState<Element[]>(() => {
-        return new Array(1).fill(0).map(() => createDice(6));
+        return new Array(INITIAL_DICE).fill(0).map(() => createDice(6));
     });
     const [numRerolls, setRerolls] = useState(1);
     const [numIncrements, setIncrements] = useState(0);
@@ -106,6 +108,7 @@ export const GameStateComponent = () => {
                 key={gameState.gameKey}
                 {...gameState}
                 onComplete={onComplete}
+                automationEnabled
             />
             <button
                 disabled={!isComplete}

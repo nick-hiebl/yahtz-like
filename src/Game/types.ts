@@ -7,3 +7,7 @@ export type GameArguments = {
 
     targets: Target[];
 };
+
+export type Action =
+    | { type: 'reroll' }
+    | { type: 'target'; id: string };

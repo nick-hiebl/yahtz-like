@@ -1,8 +1,5 @@
+import { getRandomListItem } from './random';
 import type { Coin, Dice, Value } from './types';
-
-const getRandomListItem = <T>(items: T[]): T => {
-    return items[Math.floor(Math.random() * items.length)];
-};
 
 export const createDice = (maxValue: number): Dice => {
     const increment = (value: Value): Value => {

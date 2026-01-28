@@ -102,6 +102,13 @@ button.target-score.placeholder:hover {
     font-weight: bold;
 }
 
+.target-result {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    transform: scale(0.75);
+}
+
 .inc-dec {
     display: flex;
     flex-direction: row;

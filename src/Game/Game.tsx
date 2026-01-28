@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { type Element, type Roll, type Target, type Value, isNumberValue } from '../types';
 import { isValueEqual, sum } from '../value-utils';
 
+import { gameAutomation } from './automation';
 import type { GameArguments } from './types';
 
 import './Game.css';
@@ -41,16 +42,21 @@ const getRoll = (element: Element): Roll => ({ element, value: element.getValue(
 
 type GameProps = GameArguments & {
     onComplete: (score: number) => void;
+    automationEnabled?: boolean;
 };
 
+const AUTOMATION_DURATION = 5_000;
+
 export const Game = (props: GameProps) => {
-    const [incsLeft, setIncsLeft] = useState(props.numIncrements);
-    const [rerollsLeft, setRerollsLeft] = useState(props.numRerolls);
+    const { automationEnabled, elements, numIncrements, numRerolls, onComplete } = props;
+
+    const [incsLeft, setIncsLeft] = useState(numIncrements);
+    const [rerollsLeft, setRerollsLeft] = useState(numRerolls);
     const [rolls, setRolls] = useState<Roll[]>(() => {
-        return props.elements.map(getRoll);
+        return elements.map(getRoll);
     });
 
-    const [locks, setLocks] = useState(new Array(props.elements.length).fill(false));
+    const [locks, setLocks] = useState(new Array(elements.length).fill(false));
 
     const diceLength = rolls.length;
     const locksLength = locks.length;
@@ -65,7 +71,7 @@ export const Game = (props: GameProps) => {
         return props.targets.slice().map(v => ({ ...v }));
     });
 
-    const reroll = () => {
+    const reroll = useCallback(() => {
         if (rerollsLeft <= 0) {
             return;
         }
@@ -76,9 +82,9 @@ export const Game = (props: GameProps) => {
             return { element: roll.element, value: roll.element.getValue() };
         }));
         setRerollsLeft(current => current - 1);
-    };
+    }, [locks, rerollsLeft, rolls]);
 
-    const lockTarget = (targetId: string) => {
+    const lockTarget = useCallback((targetId: string) => {
         const anyIncompleteTarget = targets.some(target => target.id !== targetId && target.result == null);
         setTargets(targets => targets.map(target => {
             if (target.id !== targetId) {
@@ -94,19 +100,17 @@ export const Game = (props: GameProps) => {
             };
         }));
 
-        setLocks(new Array(props.elements.length).fill(false));
+        setLocks(new Array(elements.length).fill(false));
 
         if (anyIncompleteTarget) {
-            setRolls(props.elements.map(getRoll));
+            setRolls(elements.map(getRoll));
         }
 
-        setRerollsLeft(props.numRerolls);
-        setIncsLeft(props.numIncrements);
-    };
+        setRerollsLeft(numRerolls);
+        setIncsLeft(numIncrements);
+    }, [elements, numIncrements, numRerolls, rolls, targets]);
 
     const isCompleted = targets.every(target => !!target.result);
-
-    const onComplete = props.onComplete;
 
     useEffect(() => {
         if (!isCompleted) {
@@ -116,13 +120,33 @@ export const Game = (props: GameProps) => {
         onComplete(sum(targets.map(v => v.score ?? 0)));
     }, [onComplete, isCompleted, targets]);
 
+    useEffect(() => {
+        if (isCompleted || !automationEnabled) {
+            return;
+        }
+
+        const t = setTimeout(() => {
+            const action = gameAutomation(rolls, targets.filter(t => !t.result), rerollsLeft);
+
+            if (action.type === 'reroll') {
+                reroll();
+            } else if (action.type === 'target') {
+                lockTarget(action.id);
+            }
+        }, AUTOMATION_DURATION);
+
+        return () => {
+            clearTimeout(t);
+        }
+    }, [automationEnabled, isCompleted, lockTarget, reroll, rerollsLeft, rolls, targets]);
+
     return (
         <div id="game-board" data-completed={isCompleted}>
             <div id="dice-box">
                 <div id="dice-list">
                     {rolls.map(({ element, value }, index) => (
                         <div className="dice-and-lock" key={index}>
-                            {element.type === 'dice' && props.numIncrements > 0 && (
+                            {element.type === 'dice' && numIncrements > 0 && (
                                 <div className="inc-dec">
                                     <button
                                         className="inc-dec-button"
@@ -155,7 +179,7 @@ export const Game = (props: GameProps) => {
                                 </div>
                             )}
                             <ValueComponent type={element.type} value={value} />
-                            {props.elements.length > 1 && (
+                            {elements.length > 1 && (
                                 <input
                                     disabled={isCompleted}
                                     checked={locks[index]}
@@ -170,12 +194,12 @@ export const Game = (props: GameProps) => {
                     ))}
                 </div>
                 <div id="game-actions">
-                    {props.numRerolls > 0 && (
+                    {numRerolls > 0 && (
                         <div>
                             <button disabled={isCompleted || rerollsLeft <= 0 || locks.every(v => v)} onClick={reroll}>Re-roll ({rerollsLeft} left)</button>
                         </div>
                     )}
-                    {props.numIncrements > 0 && (
+                    {numIncrements > 0 && (
                         <span>Remaining increments/decrements: {incsLeft}</span>
                     )}
                 </div>
@@ -194,7 +218,7 @@ export const Game = (props: GameProps) => {
                             <div>{target.name}</div>
                         </div>
                         {target.result && (
-                            <div>
+                            <div className="target-result">
                                 {target.result.map((roll, index) => (
                                     <ValueComponent key={index} type={roll.element.type} value={roll.value} />
                                 ))}
