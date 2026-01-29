@@ -56,6 +56,7 @@ type GameProps = GameArguments & {
 };
 
 const AUTOMATION_DURATION = 1_000;
+const MAX_FITTING_ELEMENTS = 8;
 
 export const Game = (props: GameProps) => {
     const {
@@ -249,10 +250,13 @@ export const Game = (props: GameProps) => {
                                 <div>{target.name}</div>
                             </div>
                             {target.result && (
-                                <div className="row gap-4px">
+                                <div className="target-result row gap-4px">
                                     {target.result.map((roll, index) => (
                                         <ValueComponent key={index} type={roll.element.type} value={roll.value} size="small" />
                                     ))}
+                                    {target.result.length > MAX_FITTING_ELEMENTS && (
+                                        <div className="overflow-gradient" />
+                                    )}
                                 </div>
                             )}
                         </div>
