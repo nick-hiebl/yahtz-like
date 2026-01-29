@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { Game, ValueComponent } from '../Game';
-import { GameArguments } from '../Game/types';
+import { ValueComponent } from '../Game';
 import { createCoin, createDice } from '../element';
 import { type Element, type Target, isNumberValue } from '../types';
 import { countMatchingPredicate, countSymbol, sum } from '../value-utils';
+
+import { GameManager } from './GameManager';
 
 import './style.css';
 
@@ -52,8 +53,6 @@ const TARGETS: Record<string, Target & TargetShopInfo> = {
 const WILD_COIN_COST = 40;
 const AUTOMATION_COST = 10;
 
-const RESET_TIMEOUT = 1_000;
-
 const ElementComponent = ({ element }: { element: Element }) => {
     if (element.type === 'dice') {
         return <ValueComponent type="dice" value={element.maxValue} />
@@ -71,22 +70,11 @@ export const GameStateComponent = () => {
         return new Array(INITIAL_DICE).fill(0).map(() => createDice(6));
     });
     const [automationEnabled, setAutomationEnabled] = useState(false);
-    const [automationOn, setAutomationOn] = useState(false);
     const [numRerolls, setRerolls] = useState(1);
     const [numIncrements, setIncrements] = useState(0);
     const [targets, setTargets] = useState<Target[]>([TARGETS.MAX]);
-    const [autoReset, setAutoReset] = useState(false);
-
-    const [gameState, setGameState] = useState<GameArguments & { gameKey: string }>({
-        elements,
-        numRerolls,
-        numIncrements,
-        targets,
-        gameKey: Math.random().toString(),
-    });
 
     const [money, setMoney] = useState(0);
-    const [isComplete, setComplete] = useState(false);
 
     const nextDiceCost = elements.filter(({ type }) => type === 'dice').length * 10 || 10;
     const nextCoinCost = elements.filter(({ type }) => type === 'coin').length * 5 || 5;
@@ -95,7 +83,6 @@ export const GameStateComponent = () => {
 
     const onComplete = useCallback((score: number) => {
         setMoney(current => current + score);
-        setComplete(true);
     }, []);
 
     const buyableTargets = Object.entries(TARGETS)
@@ -108,63 +95,16 @@ export const GameStateComponent = () => {
             return target.buyCondition(elements);
         });
 
-    const resetGame = useCallback(() => {
-        setComplete(false);
-        setGameState({
-            elements,
-            numIncrements,
-            numRerolls,
-            targets,
-            gameKey: Math.random().toString(),
-        });
-    }, [elements, numIncrements, numRerolls, targets]);
-
-    useEffect(() => {
-        if (!autoReset || !isComplete) {
-            return;
-        }
-
-        const t = setTimeout(() => {
-            resetGame();
-        }, RESET_TIMEOUT);
-
-        return () => {
-            clearTimeout(t);
-        };
-    }, [autoReset, isComplete, resetGame]);
-
     return (
         <div className="column gap-8px">
-            <Game
-                key={gameState.gameKey}
-                {...gameState}
-                onComplete={onComplete}
+            <GameManager
+                elements={elements}
+                targets={targets}
                 automationEnabled={automationEnabled}
-                automationOn={automationEnabled && automationOn}
-                setAutomationOn={setAutomationOn}
+                numRerolls={numRerolls}
+                numIncrements={numIncrements}
+                onComplete={onComplete}
             />
-            <div className="row">
-                <button
-                    disabled={!isComplete}
-                    onClick={() => {
-                        resetGame();
-                    }}
-                >
-                    Start game
-                </button>
-                {automationEnabled && (
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={autoReset}
-                            onChange={e => {
-                                setAutoReset(e.currentTarget.checked);
-                            }}
-                        />
-                        Auto-reset?
-                    </label>
-                )}
-            </div>
             <div id="inventory" className="column gap-8px">
                 <h2>Inventory</h2>
                 <div className="column gap-4px">
