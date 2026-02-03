@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { GameStateComponent } from './GameState';
 import type { PurchaseableElement, PurchaseableTarget } from './GameState/types';
 import { createDice } from './element';
@@ -82,6 +84,8 @@ const getPurchaseableTargets = (owned: Element[]): PurchaseableTarget[] => {
 };
 
 function App() {
+    const [isSecondShown, setSecondShown] = useState(true);
+
     return (
         <div className="App">
             <GameStateComponent
@@ -92,6 +96,20 @@ function App() {
                 getPurchaseableElements={getPurchaseableElements}
                 getPurchaseableTargets={getPurchaseableTargets}
             />
+            <label>
+                <input type="checkbox" checked={isSecondShown} onChange={e => setSecondShown(e.currentTarget.checked)} />
+                Is second shown?
+            </label>
+            <div data-hidden={!isSecondShown}>
+                <GameStateComponent
+                    getInitialElements={getInitialElements}
+                    getInitialTargets={getInitialTargets}
+                    getIncrementCost={getIncrementCost}
+                    getRerollCost={getRerollCost}
+                    getPurchaseableElements={getPurchaseableElements}
+                    getPurchaseableTargets={getPurchaseableTargets}
+                />
+            </div>
         </div>
     );
 }
