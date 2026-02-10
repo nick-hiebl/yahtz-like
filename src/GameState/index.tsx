@@ -2,21 +2,16 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { ValueComponent } from '../Game';
 import { canAfford } from '../money-utils';
-import type { Money, Cost, Element, Target } from '../types';
+import type { Cost, Element, Target } from '../types';
 
 import { GameManager } from './GameManager';
-import type { PurchaseableElement, PurchaseableTarget } from './types';
+import type { MoneyProps, PurchaseableElement, PurchaseableTarget } from './types';
 
 import './style.css';
 
 const AUTOMATION_COST = { dollar: 10 };
 
-type Props = {
-    /**
-     * Amount of money the player has
-     */
-    money: Money;
-    updateMoney: (delta: Cost, direction: 'gain' | 'loss') => void;
+type Props = MoneyProps & {
     getInitialElements: () => Element[];
     getInitialTargets: () => Target[];
     getPurchaseableElements: (owned: Element[]) => PurchaseableElement[];
