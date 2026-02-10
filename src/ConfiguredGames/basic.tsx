@@ -2,7 +2,7 @@ import { GameStateComponent } from '../GameState';
 import type { MoneyProps, PurchaseableElement, PurchaseableTarget } from '../GameState/types';
 import { createDice } from '../element';
 import { isNumberValue, type Cost, type Element, type Target } from '../types';
-import { countMatchingPredicate, countSymbol, sum } from '../value-utils';
+import { countMatchingPredicate, sum } from '../value-utils';
 
 const getInitialElements = () => {
     return new Array(1).fill(null).map(() => createDice(6));
@@ -43,20 +43,6 @@ const TARGETS: Record<string, Target & TargetShopInfo> = {
         name: 'Min',
         scorer: vs => Math.min(...vs.filter(isNumberValue).map(v => v.value)) ?? 0,
         cost: 11,
-    },
-    DOUBLE_HEADS: {
-        id: 'double-heads',
-        name: 'Double heads',
-        scorer: vs => countSymbol('H')(vs) >= 2 ? 10 : 0,
-        cost: 1,
-        buyCondition: es => countMatchingPredicate(es, e => e.type === 'coin', 2),
-    },
-    DOUBLE_TAILS: {
-        id: 'double-tails',
-        name: 'Double tails',
-        scorer: vs => countSymbol('T')(vs) >= 2 ? 10 : 0,
-        cost: 1,
-        buyCondition: es => countMatchingPredicate(es, e => e.type === 'coin', 2),
     },
     SUM: {
         id: 'sum',
