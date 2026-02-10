@@ -36,3 +36,9 @@ export type Coin = {
 export type Element = Dice | Coin;
 
 export type Roll = { element: Element; value: Value };
+
+export type MoneyTypes = 'dollar' | 'rocket';
+
+export type Money = Record<MoneyTypes, number>;
+
+export type Cost = Partial<Money>;

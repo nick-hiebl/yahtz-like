@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { type Element, type Roll, type Target, type Value, isNumberValue } from '../types';
+import { type Cost, type Element, type Roll, type Target, type Value, isNumberValue } from '../types';
 import { isValueEqual, sum } from '../value-utils';
 
 import { gameAutomation } from './automation';
@@ -49,7 +49,7 @@ export const ValueComponent = ({ value, size, type }: ValueComponentProps) => {
 const getRoll = (element: Element): Roll => ({ element, value: element.getValue() });
 
 type GameProps = GameArguments & {
-    onComplete: (score: number) => void;
+    onComplete: (reward: Cost) => void;
     automationEnabled?: boolean;
     automationOn: boolean;
     setAutomationOn: (state: boolean) => void;
@@ -136,7 +136,7 @@ export const Game = (props: GameProps) => {
             return;
         }
 
-        onComplete(sum(targets.map(v => v.score ?? 0)));
+        onComplete({ dollar: sum(targets.map(v => v.score ?? 0)) });
     }, [onComplete, isCompleted, targets]);
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-import type { Element, Target } from '../types';
+import type { Cost, Element, Target } from '../types';
 
 export type GameState = {
     elements: Element[];
@@ -6,7 +6,7 @@ export type GameState = {
 
 export type PurchaseableElement = {
     element: () => Element;
-    cost: number;
+    cost: Cost;
     available: boolean;
     key: string;
     buyText: string;
@@ -14,6 +14,6 @@ export type PurchaseableElement = {
 
 export type PurchaseableTarget = {
     target: Target;
-    cost: number;
+    cost: Cost;
     available: boolean;
 };

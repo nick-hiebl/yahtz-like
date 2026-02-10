@@ -119,6 +119,7 @@ button.target-score.placeholder {
     color: #888;
     cursor: pointer;
     padding: 0;
+    text-decoration: underline;
 }
 
 button.target-score.placeholder:hover {

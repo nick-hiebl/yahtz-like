@@ -1,22 +1,28 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { ValueComponent } from '../Game';
-import { type Element, type Target } from '../types';
+import { canAfford } from '../money-utils';
+import type { Money, Cost, Element, Target } from '../types';
 
 import { GameManager } from './GameManager';
 import type { PurchaseableElement, PurchaseableTarget } from './types';
 
 import './style.css';
 
-const AUTOMATION_COST = 10;
+const AUTOMATION_COST = { dollar: 10 };
 
 type Props = {
+    /**
+     * Amount of money the player has
+     */
+    money: Money;
+    updateMoney: (delta: Cost, direction: 'gain' | 'loss') => void;
     getInitialElements: () => Element[];
     getInitialTargets: () => Target[];
     getPurchaseableElements: (owned: Element[]) => PurchaseableElement[];
     getPurchaseableTargets: (owned: Element[]) => PurchaseableTarget[];
-    getRerollCost: (numRerolls: number) => number;
-    getIncrementCost: (numIncrements: number) => number;
+    getRerollCost: (numRerolls: number) => Cost;
+    getIncrementCost: (numIncrements: number) => Cost;
 };
 
 const ElementComponent = ({ element }: { element: Element }) => {
@@ -36,6 +42,8 @@ export const GameStateComponent = ({
     getPurchaseableElements,
     getPurchaseableTargets,
     getRerollCost,
+    money,
+    updateMoney,
 }: Props) => {
     const [elements, setElements] = useState<Element[]>(() => getInitialElements());
 
@@ -44,12 +52,12 @@ export const GameStateComponent = ({
     const [numIncrements, setIncrements] = useState(0);
     const [targets, setTargets] = useState<Target[]>(() => getInitialTargets());
 
-    const [money, setMoney] = useState(0);
+    // const [money, setMoney] = useState(0);
 
     const purchaseableElements = useMemo(() => {
         return getPurchaseableElements(elements)
             .filter(el => el.available);
-    }, [elements]);
+    }, [elements, getPurchaseableElements]);
 
     const purchaseableTargets = useMemo(() => {
         const ownedTargetSet = new Set(...targets.map(t => t.id));
@@ -57,14 +65,14 @@ export const GameStateComponent = ({
             .filter(target => {
                 return target.available && !ownedTargetSet.has(target.target.id);
             });
-    }, [elements]);
+    }, [elements, getPurchaseableTargets, targets]);
 
     const nextRerollCost = getRerollCost(numRerolls);
     const nextIncrementCost = getIncrementCost(numIncrements);
 
-    const onComplete = useCallback((score: number) => {
-        setMoney(current => current + score);
-    }, []);
+    const onComplete = useCallback((reward: Cost) => {
+        updateMoney(reward, 'gain');
+    }, [updateMoney]);
 
     return (
         <div className="column gap-8px">
@@ -93,54 +101,52 @@ export const GameStateComponent = ({
             </div>
             <div id="shop" className="column gap-8px">
                 <h2>Shop</h2>
-                <div>Money: ${money}</div>
+                <div>Money: ${money.dollar}</div>
                 <div className="row gap-4px">
-                    {purchaseableElements.map(({ available, buyText, key, cost, element }) => {
+                    {purchaseableElements.map(({ available, buyText, key, cost: price, element }) => {
                         if (!available) {
                             return null;
                         }
 
-                        const price = cost;
-
                         return (
                             <button
                                 key={key}
-                                disabled={money < price}
+                                disabled={!canAfford(money, price)}
                                 onClick={() => {
-                                    setMoney(current => current - price);
+                                    updateMoney(price, 'loss');
                                     setElements(elements => elements.concat(element()));
                                 }}
                             >
-                                {buyText} (${price})
+                                {buyText} (${price.dollar})
                             </button>
                         );
                     })}
                     <button
-                        disabled={money < nextRerollCost}
+                        disabled={!canAfford(money, nextRerollCost)}
                         onClick={() => {
-                            setMoney(current => current - nextRerollCost);
+                            updateMoney(nextRerollCost, 'loss');
                             setRerolls(current => current + 1);
                         }}
                     >
-                        Buy reroll (${nextRerollCost})
+                        Buy reroll (${nextRerollCost.dollar})
                     </button>
                     <button
-                        disabled={money < nextIncrementCost}
+                        disabled={!canAfford(money, nextIncrementCost)}
                         onClick={() => {
-                            setMoney(current => current - nextIncrementCost);
+                            updateMoney(nextIncrementCost, 'loss');
                             setIncrements(current => current + 1);
                         }}
                     >
-                        Buy increment (${nextIncrementCost})
+                        Buy increment (${nextIncrementCost.dollar})
                     </button>
                     <button
-                        disabled={money < AUTOMATION_COST || automationEnabled}
+                        disabled={!canAfford(money, AUTOMATION_COST) || automationEnabled}
                         onClick={() => {
-                            setMoney(current => current - AUTOMATION_COST);
+                            updateMoney(AUTOMATION_COST, 'loss');
                             setAutomationEnabled(true);
                         }}
                     >
-                        Buy automation ({automationEnabled ? 'Bought' : `$${AUTOMATION_COST}`})
+                        Buy automation ({automationEnabled ? 'Bought' : `$${AUTOMATION_COST.dollar}`})
                     </button>
                 </div>
                 {purchaseableTargets.length > 0 && (
@@ -157,11 +163,11 @@ export const GameStateComponent = ({
                                         key={target.id}
                                         disabled={money < cost || targets.map(t => t.id).includes(target.id)}
                                         onClick={() => {
-                                            setMoney(current => current - cost);
+                                            updateMoney(cost, 'loss');
                                             setTargets(current => current.concat(target));
                                         }}
                                     >
-                                        {target.name} (${cost})
+                                        {target.name} (${cost.dollar})
                                     </button>
                                 );
                             })}

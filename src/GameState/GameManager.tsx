@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { Game } from '../Game';
 import { GameArguments } from '../Game/types';
-import { type Element, type Target } from '../types';
+import type { Cost, Element, Target } from '../types';
 
 import './style.css';
 
@@ -15,7 +15,7 @@ type Props = {
     numIncrements: number;
     targets: Target[];
 
-    onComplete: (score: number) => void;
+    onComplete: (reward: Cost) => void;
 };
 
 export const GameManager = ({ elements, automationEnabled, numRerolls, numIncrements, onComplete, targets }: Props) => {
@@ -32,8 +32,8 @@ export const GameManager = ({ elements, automationEnabled, numRerolls, numIncrem
 
     const [isComplete, setComplete] = useState(false);
 
-    const onGameComplete = useCallback((score: number) => {
-        onComplete(score);
+    const onGameComplete = useCallback((reward: Cost) => {
+        onComplete(reward);
         setComplete(true);
     }, [onComplete]);
 
