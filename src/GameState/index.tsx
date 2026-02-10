@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { ValueComponent } from '../Game';
+import { ElementComponent } from '../Game/Element';
 import { canAfford } from '../money-utils';
 import type { Cost, Element, Target } from '../types';
 
@@ -18,16 +18,6 @@ type Props = MoneyProps & {
     getPurchaseableTargets: (owned: Element[]) => PurchaseableTarget[];
     getRerollCost: (numRerolls: number) => Cost;
     getIncrementCost: (numIncrements: number) => Cost;
-};
-
-const ElementComponent = ({ element }: { element: Element }) => {
-    if (element.type === 'dice') {
-        return <ValueComponent type="dice" value={element.maxValue} />
-    } else if (element.type === 'coin') {
-        return <ValueComponent type="coin" value={element.values[0]} />
-    }
-
-    return <span>???</span>;
 };
 
 export const GameStateComponent = ({
