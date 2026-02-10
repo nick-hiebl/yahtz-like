@@ -4,6 +4,7 @@ import { ElementComponent } from '../Game/Element';
 import { canAfford } from '../money-utils';
 import type { Cost, Element, Target } from '../types';
 
+import { CostComponent } from '../Game/Cost';
 import { GameManager } from './GameManager';
 import type { MoneyProps, PurchaseableElement, PurchaseableTarget } from './types';
 
@@ -86,7 +87,7 @@ export const GameStateComponent = ({
             </div>
             <div id="shop" className="column gap-8px">
                 <h2>Shop</h2>
-                <div>Money: ${money.dollar}</div>
+                <div>Money: <CostComponent cost={money} /></div>
                 <div className="row gap-4px">
                     {purchaseableElements.map(({ available, buyText, key, cost: price, element }) => {
                         if (!available) {
@@ -102,7 +103,7 @@ export const GameStateComponent = ({
                                     setElements(elements => elements.concat(element()));
                                 }}
                             >
-                                {buyText} (${price.dollar})
+                                {buyText} (<CostComponent cost={price} />)
                             </button>
                         );
                     })}
@@ -113,7 +114,7 @@ export const GameStateComponent = ({
                             setRerolls(current => current + 1);
                         }}
                     >
-                        Buy reroll (${nextRerollCost.dollar})
+                        Buy reroll (<CostComponent cost={nextRerollCost} />)
                     </button>
                     <button
                         disabled={!canAfford(money, nextIncrementCost)}
@@ -122,7 +123,7 @@ export const GameStateComponent = ({
                             setIncrements(current => current + 1);
                         }}
                     >
-                        Buy increment (${nextIncrementCost.dollar})
+                        Buy increment (<CostComponent cost={nextIncrementCost} />)
                     </button>
                     <button
                         disabled={!canAfford(money, AUTOMATION_COST) || automationEnabled}
@@ -131,7 +132,7 @@ export const GameStateComponent = ({
                             setAutomationEnabled(true);
                         }}
                     >
-                        Buy automation ({automationEnabled ? 'Bought' : `$${AUTOMATION_COST.dollar}`})
+                        Buy automation ({automationEnabled ? 'Bought' : <CostComponent cost={AUTOMATION_COST} />})
                     </button>
                 </div>
                 {purchaseableTargets.length > 0 && (
@@ -152,7 +153,7 @@ export const GameStateComponent = ({
                                             setTargets(current => current.concat(target));
                                         }}
                                     >
-                                        {target.name} (${cost.dollar})
+                                        {target.name} (<CostComponent cost={cost} />)
                                     </button>
                                 );
                             })}
