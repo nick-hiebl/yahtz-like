@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react';
 
+import { BasicGame } from './ConfiguredGames/basic';
+import { CoinsGame } from './ConfiguredGames/coins';
 import { addMoney, invertCost } from './money-utils';
 import { type Cost } from './types';
 
 import './App.css';
-import { BasicGame } from './ConfiguredGames/basic';
 
 function App() {
     const [isSecondShown, setSecondShown] = useState(true);
@@ -26,7 +27,7 @@ function App() {
                 Is second shown?
             </label>
             <div data-hidden={!isSecondShown}>
-                <BasicGame money={money} updateMoney={updateMoney} />
+                <CoinsGame money={money} updateMoney={updateMoney} />
             </div>
         </div>
     );

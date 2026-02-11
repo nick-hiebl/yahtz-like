@@ -38,8 +38,6 @@ export const GameStateComponent = ({
     const [numIncrements, setIncrements] = useState(0);
     const [targets, setTargets] = useState<Target[]>(() => getInitialTargets());
 
-    // const [money, setMoney] = useState(0);
-
     const purchaseableElements = useMemo(() => {
         return getPurchaseableElements(elements)
             .filter(el => el.available);
@@ -147,7 +145,7 @@ export const GameStateComponent = ({
                                 return (
                                     <button
                                         key={target.id}
-                                        disabled={money < cost || targets.map(t => t.id).includes(target.id)}
+                                        disabled={!canAfford(money, cost) || targets.map(t => t.id).includes(target.id)}
                                         onClick={() => {
                                             updateMoney(cost, 'loss');
                                             setTargets(current => current.concat(target));
