@@ -14,11 +14,15 @@ div[role="tablist"]::after {
 }
 
 button[role="tab"] {
-    padding: 4px 8px;
+    padding: 6px 12px;
     border: 1px solid grey;
     cursor: pointer;
+    border-start-end-radius: 4px;
+    border-start-start-radius: 4px;
 }
 
 button[role="tab"][aria-selected="true"] {
     border-bottom-color: white;
+    text-decoration: underline;
+    text-decoration-color: #48f;
 }
