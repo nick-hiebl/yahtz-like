@@ -9,7 +9,7 @@ const IndividualCost = ({ amount, moneyType }: IndividualCostProps) => {
     if (moneyType === 'dollar') {
         return <span>${amount}</span>;
     } else if (moneyType === 'rocket') {
-        return <span>{amount} ROCKET</span>;
+        return <span>{amount} rocket{amount === 1 ? '' : 's'}</span>;
     }
     return null;
 };

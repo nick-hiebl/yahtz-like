@@ -7,6 +7,10 @@ type IndividualRewardProps = {
 
 const IndividualReward = ({ reward }: IndividualRewardProps) => {
     if (reward.effect === 'multiplier') {
+        if (reward.currency === 'rocket') {
+            return <span>{reward.quantity + 1}x rockets</span>;
+        }
+
         return <span><CostComponent cost={{ [reward.currency]: reward.quantity + 1 }} />x</span>
     } else {
         return <CostComponent cost={{ [reward.currency]: reward.quantity }} />;
