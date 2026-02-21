@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { type Cost, type Element, type Roll, type Target, type Value, isNumberValue } from '../types';
+import { type Cost, type Element, type Roll, type Target, isNumberValue } from '../types';
 import { isValueEqual, sum } from '../value-utils';
 
 import { ValueComponent } from './Value';
