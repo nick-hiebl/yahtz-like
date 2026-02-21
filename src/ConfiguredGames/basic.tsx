@@ -4,6 +4,8 @@ import { createDice } from '../element';
 import { isNumberValue, type Cost, type Element, type Target } from '../types';
 import { countMatchingPredicate, sum } from '../value-utils';
 
+const AUTOMATION_COST = { dollar: 10 };
+
 const getInitialElements = () => {
     return new Array(1).fill(null).map(() => createDice(6));
 };
@@ -35,19 +37,19 @@ const TARGETS: Record<string, Target & TargetShopInfo> = {
     MAX: {
         id: 'max',
         name: 'Max',
-        scorer: vs => Math.max(...vs.filter(isNumberValue).map(v => v.value)) ?? 0,
+        scorer: vs => [{ currency: 'dollar', quantity: Math.max(...vs.filter(isNumberValue).map(v => v.value)) ?? 0 }],
         cost: 11,
     },
     MIN: {
         id: 'min',
         name: 'Min',
-        scorer: vs => Math.min(...vs.filter(isNumberValue).map(v => v.value)) ?? 0,
+        scorer: vs => [{ currency: 'dollar', quantity: Math.min(...vs.filter(isNumberValue).map(v => v.value)) ?? 0 }],
         cost: 11,
     },
     SUM: {
         id: 'sum',
         name: 'Sum',
-        scorer: vs => sum(vs.map(v => v.type === 'number' ? v.value : 0)),
+        scorer: vs => [{ currency: 'dollar', quantity: sum(vs.map(v => v.type === 'number' ? v.value : 0)) }],
         cost: 15,
         buyCondition: es => countMatchingPredicate(es, e => e.type === 'dice', 2),
     },
@@ -76,6 +78,7 @@ export const BasicGame = ({ money, updateMoney }: MoneyProps) => {
             getPurchaseableTargets={getPurchaseableTargets}
             money={money}
             updateMoney={updateMoney}
+            automationCost={AUTOMATION_COST}
         />
     )
 };

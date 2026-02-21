@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { type Cost, type Element, type Roll, type Target, isNumberValue } from '../types';
-import { isValueEqual, sum } from '../value-utils';
+import { isDefined } from '../utils';
+import { isValueEqual } from '../value-utils';
 
+import { CostComponent } from './Cost';
+import { RewardComponent } from './Reward';
 import { ValueComponent } from './Value';
 import { gameAutomation } from './automation';
+import { combineRewards } from './combine-rewards';
 import type { GameArguments } from './types';
 
 import './Game.css';
@@ -99,7 +103,9 @@ export const Game = (props: GameProps) => {
             return;
         }
 
-        onComplete({ dollar: sum(targets.map(v => v.score ?? 0)) });
+        const overallReward = combineRewards(targets.flatMap(target => target.score).filter(isDefined));
+
+        onComplete(overallReward);
     }, [onComplete, isCompleted, targets]);
 
     useEffect(() => {
@@ -204,10 +210,12 @@ export const Game = (props: GameProps) => {
                         <div className="target" key={target.id}>
                             <div className="target-info">
                                 {target.result ? (
-                                    <div className="target-score">{target.score}</div>
+                                    <div className="target-score">
+                                        <RewardComponent rewards={target.score!} />
+                                    </div>
                                 ) : (
                                     <button className="target-score placeholder" onClick={() => lockTarget(target.id)}>
-                                        {target.scorer(rolls.map(({ value }) => value))}
+                                        <RewardComponent rewards={target.scorer(rolls.map(({ value }) => value))} />
                                     </button>
                                 )}
                                 <div>{target.name}</div>
@@ -227,9 +235,13 @@ export const Game = (props: GameProps) => {
                     <div className="target">
                         <div className="target-info">
                             {isCompleted ? (
-                                <div className="target-score">{sum(targets.map(target => target.score ?? 0))}</div>
+                                <div className="target-score">
+                                    <CostComponent cost={combineRewards(targets.flatMap(target => target.score).filter(isDefined))} />
+                                </div>
                             ) : (
-                                <div className="target-score placeholder">{sum(targets.map(target => target.score ?? 0))}</div>
+                                <div className="target-score placeholder">
+                                    <CostComponent cost={combineRewards(targets.flatMap(target => target.score).filter(isDefined))} />
+                                </div>
                             )}
                             <strong>Total</strong>
                         </div>

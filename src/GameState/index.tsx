@@ -10,8 +10,6 @@ import type { MoneyProps, PurchaseableElement, PurchaseableTarget } from './type
 
 import './style.css';
 
-const AUTOMATION_COST = { dollar: 10 };
-
 type Props = MoneyProps & {
     getInitialElements: () => Element[];
     getInitialTargets: () => Target[];
@@ -19,6 +17,7 @@ type Props = MoneyProps & {
     getPurchaseableTargets: (owned: Element[]) => PurchaseableTarget[];
     getRerollCost: (numRerolls: number) => Cost;
     getIncrementCost: (numIncrements: number) => Cost;
+    automationCost: Cost;
 };
 
 export const GameStateComponent = ({
@@ -30,6 +29,7 @@ export const GameStateComponent = ({
     getRerollCost,
     money,
     updateMoney,
+    automationCost,
 }: Props) => {
     const [elements, setElements] = useState<Element[]>(() => getInitialElements());
 
@@ -124,13 +124,13 @@ export const GameStateComponent = ({
                         Buy increment (<CostComponent cost={nextIncrementCost} />)
                     </button>
                     <button
-                        disabled={!canAfford(money, AUTOMATION_COST) || automationEnabled}
+                        disabled={!canAfford(money, automationCost) || automationEnabled}
                         onClick={() => {
-                            updateMoney(AUTOMATION_COST, 'loss');
+                            updateMoney(automationCost, 'loss');
                             setAutomationEnabled(true);
                         }}
                     >
-                        Buy automation ({automationEnabled ? 'Bought' : <CostComponent cost={AUTOMATION_COST} />})
+                        Buy automation ({automationEnabled ? 'Bought' : <CostComponent cost={automationCost} />})
                     </button>
                 </div>
                 {purchaseableTargets.length > 0 && (

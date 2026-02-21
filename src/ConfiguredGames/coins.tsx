@@ -4,6 +4,8 @@ import { createCoin } from '../element';
 import type { Cost, Element, Target } from '../types';
 import { countSymbol } from '../value-utils';
 
+const AUTOMATION_COST = { rocket: 10 };
+
 const getInitialElements = () => {
     return new Array(1).fill(null).map(() => createCoin());
 };
@@ -35,13 +37,13 @@ const TARGETS: Record<string, Target & TargetShopInfo> = {
     HEAD: {
         id: 'head',
         name: 'Heads',
-        scorer: vs => countSymbol('H')(vs) >= 1 ? 3 : 0,
+        scorer: vs => countSymbol('H')(vs) >= 1 ? [{ currency: 'rocket', quantity: 3 }] : [],
         cost: 5,
     },
     DOUBLE_HEADS: {
         id: 'double-heads',
         name: 'Double heads',
-        scorer: vs => countSymbol('H')(vs) >= 2 ? 10 : 0,
+        scorer: vs => countSymbol('H')(vs) >= 2 ? [{ currency: 'rocket', quantity: 10, effect: 'multiplier' }] : [],
         cost: 20,
     },
 };
@@ -69,6 +71,7 @@ export const CoinsGame = ({ money, updateMoney }: MoneyProps) => {
             getPurchaseableTargets={getPurchaseableTargets}
             money={money}
             updateMoney={updateMoney}
+            automationCost={AUTOMATION_COST}
         />
     )
 };

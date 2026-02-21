@@ -19,13 +19,25 @@ type CostComponentProps = {
 };
 
 export const CostComponent = ({ cost }: CostComponentProps) => {
+    if (Object.values(cost).every(v => v === 0)) {
+        return <span>-</span>;
+    }
+
     return (
         <span>
             {(Object.entries(cost) as [MoneyTypes, number][])
                 .filter(([, a]) => a > 0)
-                .map(([type, amount]) => (
-                    <IndividualCost amount={amount} moneyType={type} key={type} />
-                ))}
+                .map(([type, amount], index) => {
+                    const i = (
+                        <IndividualCost amount={amount} moneyType={type} key={type} />
+                    );
+
+                    if (index === 0) {
+                        return i;
+                    }
+
+                    return <span>,&nbsp;{i}</span>;
+                })}
         </span>
     );
 };

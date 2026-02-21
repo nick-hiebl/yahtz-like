@@ -13,9 +13,15 @@ export function isNumberValue(value: Value): value is NumberValue {
 export type Target = {
     id: string;
     name: string;
-    scorer: (values: Value[]) => number;
+    scorer: (values: Value[]) => Reward[];
     result?: Roll[];
-    score?: number;
+    score?: Reward[];
+};
+
+export type Reward = {
+    currency: MoneyTypes;
+    effect?: 'multiplier';
+    quantity: number;
 };
 
 export type Dice = {

@@ -110,8 +110,8 @@
     box-sizing: border-box;
     text-align: center;
     border: 1px solid black;
-    aspect-ratio: 1;
     height: 24px;
+    min-width: 24px;
     line-height: 24px;
 }
 

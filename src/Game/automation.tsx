@@ -1,7 +1,7 @@
 import { getRandomListItem } from '../random';
-import { Roll, Target } from '../types';
+import type { Reward, Roll, Target } from '../types';
 
-import { Action } from './types';
+import type { Action } from './types';
 
 export const gameAutomation = (
     rolls: Roll[],
@@ -14,19 +14,20 @@ export const gameAutomation = (
 
     const values = rolls.map(roll => roll.value);
 
-    const highestScoringTarget = targets.reduce<{ score: number; id: string } | null>((best, currentTarget) => {
+    const highestScoringTarget = targets.reduce<{ score: Reward[]; simpleTotal: number; id: string } | null>((best, currentTarget) => {
         const currentScore = currentTarget.scorer(values);
+        const numTotal = currentScore.reduce((a, b) => a + b.quantity, 0);
 
         if (!best) {
-            if (currentScore > 0) {
-                return { score: currentScore, id: currentTarget.id };
+            if (numTotal > 0) {
+                return { score: currentScore, id: currentTarget.id, simpleTotal: numTotal };
             }
 
             return null;
         }
 
-        if (currentScore > best.score) {
-            return { score: currentScore, id: currentTarget.id };
+        if (numTotal > best.simpleTotal) {
+            return { score: currentScore, id: currentTarget.id, simpleTotal: numTotal };
         } else {
             return best;
         }
