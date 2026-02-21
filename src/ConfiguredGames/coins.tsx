@@ -10,8 +10,6 @@ const getInitialElements = () => {
     return new Array(1).fill(null).map(() => createCoin());
 };
 
-const getIncrementCost = (incs: number): Cost => ({ dollar: (incs + 1) * (incs + 2) * 2 });
-
 const getRerollCost = (rerolls: number): Cost => ({ dollar: rerolls * (rerolls + 1) });
 
 const getPurchaseableElements = (owned: Element[]): PurchaseableElement[] => {
@@ -65,7 +63,6 @@ export const CoinsGame = ({ money, updateMoney }: MoneyProps) => {
         <GameStateComponent
             getInitialElements={getInitialElements}
             getInitialTargets={getInitialTargets}
-            getIncrementCost={getIncrementCost}
             getRerollCost={getRerollCost}
             getPurchaseableElements={getPurchaseableElements}
             getPurchaseableTargets={getPurchaseableTargets}

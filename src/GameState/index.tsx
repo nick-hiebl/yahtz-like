@@ -15,8 +15,8 @@ type Props = MoneyProps & {
     getInitialTargets: () => Target[];
     getPurchaseableElements: (owned: Element[]) => PurchaseableElement[];
     getPurchaseableTargets: (owned: Element[]) => PurchaseableTarget[];
-    getRerollCost: (numRerolls: number) => Cost;
-    getIncrementCost: (numIncrements: number) => Cost;
+    getRerollCost?: (numRerolls: number) => Cost;
+    getIncrementCost?: (numIncrements: number) => Cost;
     automationCost: Cost;
 };
 
@@ -51,8 +51,8 @@ export const GameStateComponent = ({
             });
     }, [elements, getPurchaseableTargets, targets]);
 
-    const nextRerollCost = getRerollCost(numRerolls);
-    const nextIncrementCost = getIncrementCost(numIncrements);
+    const nextRerollCost = getRerollCost?.(numRerolls);
+    const nextIncrementCost = getIncrementCost?.(numIncrements);
 
     const onComplete = useCallback((reward: Cost) => {
         updateMoney(reward, 'gain');
@@ -105,24 +105,28 @@ export const GameStateComponent = ({
                             </button>
                         );
                     })}
-                    <button
-                        disabled={!canAfford(money, nextRerollCost)}
-                        onClick={() => {
-                            updateMoney(nextRerollCost, 'loss');
-                            setRerolls(current => current + 1);
-                        }}
-                    >
-                        Buy reroll (<CostComponent cost={nextRerollCost} />)
-                    </button>
-                    <button
-                        disabled={!canAfford(money, nextIncrementCost)}
-                        onClick={() => {
-                            updateMoney(nextIncrementCost, 'loss');
-                            setIncrements(current => current + 1);
-                        }}
-                    >
-                        Buy increment (<CostComponent cost={nextIncrementCost} />)
-                    </button>
+                    {getRerollCost && nextRerollCost && (
+                        <button
+                            disabled={!canAfford(money, nextRerollCost)}
+                            onClick={() => {
+                                updateMoney(nextRerollCost, 'loss');
+                                setRerolls(current => current + 1);
+                            }}
+                        >
+                            Buy reroll (<CostComponent cost={nextRerollCost} />)
+                        </button>
+                    )}
+                    {getIncrementCost && nextIncrementCost && (
+                        <button
+                            disabled={!canAfford(money, nextIncrementCost)}
+                            onClick={() => {
+                                updateMoney(nextIncrementCost, 'loss');
+                                setIncrements(current => current + 1);
+                            }}
+                        >
+                            Buy increment (<CostComponent cost={nextIncrementCost} />)
+                        </button>
+                    )}
                     <button
                         disabled={!canAfford(money, automationCost) || automationEnabled}
                         onClick={() => {
