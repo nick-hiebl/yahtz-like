@@ -1,15 +1,14 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { BasicGame } from './ConfiguredGames/basic';
 import { CoinsGame } from './ConfiguredGames/coins';
+import { type Tab, Tabs } from './Tabs';
 import { addMoney, invertCost } from './money-utils';
 import { type Cost } from './types';
 
 import './App.css';
 
 function App() {
-    const [isSecondShown, setSecondShown] = useState(true);
-
     const [money, setMoney] = useState({ dollar: 0, rocket: 0 });
 
     const updateMoney = useCallback((delta: Cost, direction: 'gain' | 'loss') => {
@@ -19,16 +18,24 @@ function App() {
         ));
     }, []);
 
+    const tabs = useMemo<Tab[]>(() => {
+        return [
+            {
+                id: 'base',
+                name: 'Base',
+                content: <BasicGame money={money} updateMoney={updateMoney} />,
+            },
+            {
+                id: 'coin',
+                name: 'Coin',
+                content: <CoinsGame money={money} updateMoney={updateMoney} />,
+            },
+        ];
+    }, [money, updateMoney]);
+
     return (
         <div className="App">
-            <BasicGame money={money} updateMoney={updateMoney} />
-            <label>
-                <input type="checkbox" checked={isSecondShown} onChange={e => setSecondShown(e.currentTarget.checked)} />
-                Is second shown?
-            </label>
-            <div data-hidden={!isSecondShown}>
-                <CoinsGame money={money} updateMoney={updateMoney} />
-            </div>
+            <Tabs tabs={tabs} />
         </div>
     );
 }
