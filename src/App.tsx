@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { BasicGame } from './ConfiguredGames/basic';
 import { CoinsGame } from './ConfiguredGames/coins';
+import { SettlerGame } from './ConfiguredGames/settlers';
 import { type Tab, Tabs } from './Tabs';
 import { addMoney, invertCost } from './money-utils';
 import type { Cost, GameAction } from './types';
@@ -39,6 +40,11 @@ function App() {
                 id: 'base',
                 name: 'Base',
                 content: <BasicGame money={money} updateMoney={updateMoney} onGameStateChange={onGameStateChange} />,
+            },
+            {
+                id: 'settler',
+                name: 'Settlers',
+                content: <SettlerGame money={money} updateMoney={updateMoney} onGameStateChange={onGameStateChange} />,
             },
             {
                 id: 'coin',

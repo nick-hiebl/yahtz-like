@@ -2,29 +2,45 @@ import { useMemo } from 'react';
 
 import { GameStateComponent } from '../GameState';
 import type { GameProps, PurchaseableElement, PurchaseableTarget } from '../GameState/types';
-import { createDice } from '../element';
-import { isNumberValue, Upgrade, type Cost, type Element, type Target } from '../types';
+import { isNumberValue, type Dice, type Element, type SymbolValue, type Target, type Upgrade } from '../types';
 import { countMatchingPredicate, sum } from '../value-utils';
 
 const AUTOMATION_COST = { dollar: 10 };
 
-const getInitialElements = () => {
-    return new Array(1).fill(null).map(() => createDice(6));
+const settlerDice = (): Dice => {
+    const options: SymbolValue[] = [
+        { type: 'symbol', value: 'wheat' },
+        { type: 'symbol', value: 'sheep' },
+        { type: 'symbol', value: 'wood' },
+        { type: 'symbol', value: 'brick' },
+        { type: 'symbol', value: 'rock' },
+    ];
+
+    return {
+        type: 'dice',
+        values: options,
+        maxValue: { type: 'number', value: 0 },
+        getValue: () => {
+            return options[Math.floor(Math.random() * options.length)];
+        },
+        increment: v => v,
+        decrement: v => v,
+    };
 };
 
-const getIncrementCost = (incs: number): Cost => ({ dollar: (incs + 1) * (incs + 2) * 2 });
-
-const getRerollCost = (rerolls: number): Cost => ({ dollar: rerolls * (rerolls + 1) });
+const getInitialElements = () => {
+    return new Array(1).fill(null).map(settlerDice);
+};
 
 const getPurchaseableElements = (owned: Element[]): PurchaseableElement[] => {
-    const d6Count = owned.filter(e => e.type === 'dice' && e.maxValue.value === 6).length;
+    const diceCount = owned.filter(e => e.type === 'dice' && e.maxValue.value === 0).length;
 
     return [
         {
-            key: 'd6',
-            buyText: 'Buy dice',
-            element: () => createDice(6),
-            cost: { dollar: d6Count * 10 },
+            key: 's-dice',
+            buyText: 'Settler dice',
+            element: settlerDice,
+            cost: { dollar: diceCount * 10 },
             available: true,
         },
     ];
@@ -69,15 +85,15 @@ const getPurchaseableTargets = (owned: Element[]): PurchaseableTarget[] => {
     });
 };
 
-export const BasicGame = ({ money, onGameStateChange, updateMoney }: GameProps) => {
+export const SettlerGame = ({ money, onGameStateChange, updateMoney }: GameProps) => {
     const upgrades = useMemo<Upgrade[]>(() => {
         return [
             {
-                id: 'buy-settler-game',
-                name: 'Buy settlers game',
-                cost: { dollar: 1 },
+                id: 'buy-coins-game',
+                name: 'Buy coins game',
+                cost: { dollar: 50 },
                 onPurchase: () => {
-                    onGameStateChange({ type: 'enable-tab', tabName: 'settler' });
+                    onGameStateChange({ type: 'enable-tab', tabName: 'coin' });
                 },
             },
         ];
@@ -86,8 +102,6 @@ export const BasicGame = ({ money, onGameStateChange, updateMoney }: GameProps) 
         <GameStateComponent
             getInitialElements={getInitialElements}
             getInitialTargets={getInitialTargets}
-            getIncrementCost={getIncrementCost}
-            getRerollCost={getRerollCost}
             getPurchaseableElements={getPurchaseableElements}
             getPurchaseableTargets={getPurchaseableTargets}
             money={money}

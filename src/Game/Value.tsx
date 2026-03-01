@@ -8,6 +8,8 @@ type ValueComponentProps = {
     size?: 'medium' | 'small';
 };
 
+const KNOWN_SYMBOLS = ['wheat', 'sheep', 'wood', 'brick', 'rock'];
+
 export const ValueComponent = ({ value, size, type }: ValueComponentProps) => {
     const sizeClasses = size === 'small' ? 'small' : '';
 
@@ -31,6 +33,13 @@ export const ValueComponent = ({ value, size, type }: ValueComponentProps) => {
                 <span>W</span>
             </div>
         );
+    } else if (value.type === 'symbol' && KNOWN_SYMBOLS.includes(value.value)) {
+        const height = size === 'small' ? 20 : 28;
+        return (
+            <div className={`dice-value ${sizeClasses}`}>
+                <img src={`./yahtz-like/assets/${value.value}.png`} height={height} alt={value.value} />
+            </div>
+        )
     }
 
     return (
