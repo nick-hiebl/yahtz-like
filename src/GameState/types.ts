@@ -1,4 +1,4 @@
-import type { Cost, Element, Money, Target } from '../types';
+import type { Cost, Element, GameAction, Money, Target } from '../types';
 
 export type GameState = {
     elements: Element[];
@@ -25,3 +25,5 @@ export type MoneyProps = {
     money: Money;
     updateMoney: (delta: Cost, direction: 'gain' | 'loss') => void;
 };
+
+export type GameProps = MoneyProps & { onGameStateChange: (action: GameAction) => void };

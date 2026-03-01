@@ -18,6 +18,13 @@ export type Target = {
     score?: Reward[];
 };
 
+export type Upgrade = {
+    id: string;
+    name: string;
+    cost: Cost;
+    onPurchase: () => void;
+};
+
 export type Reward = {
     currency: MoneyTypes;
     effect?: 'multiplier';
@@ -48,3 +55,6 @@ export type MoneyTypes = 'dollar' | 'rocket';
 export type Money = Record<MoneyTypes, number>;
 
 export type Cost = Partial<Money>;
+
+export type GameAction =
+    | { type: 'enable-tab', tabName: string };

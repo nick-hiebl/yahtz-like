@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { ElementComponent } from '../Game/Element';
 import { canAfford } from '../money-utils';
-import type { Cost, Element, Target } from '../types';
+import type { Cost, Element, Target, Upgrade } from '../types';
 
 import { CostComponent } from '../Game/Cost';
 import { GameManager } from './GameManager';
@@ -17,6 +17,7 @@ type Props = MoneyProps & {
     getPurchaseableTargets: (owned: Element[]) => PurchaseableTarget[];
     getRerollCost?: (numRerolls: number) => Cost;
     getIncrementCost?: (numIncrements: number) => Cost;
+    upgrades: Upgrade[];
     automationCost: Cost;
 };
 
@@ -30,8 +31,10 @@ export const GameStateComponent = ({
     money,
     updateMoney,
     automationCost,
+    upgrades,
 }: Props) => {
     const [elements, setElements] = useState<Element[]>(() => getInitialElements());
+    const [boughtUpgrades, setBoughtUpgrades] = useState<Set<string>>(new Set());
 
     const [automationEnabled, setAutomationEnabled] = useState(false);
     const [numRerolls, setRerolls] = useState(1);
@@ -137,6 +140,33 @@ export const GameStateComponent = ({
                         Buy automation ({automationEnabled ? 'Bought' : <CostComponent cost={automationCost} />})
                     </button>
                 </div>
+                {upgrades.length > 0 && (
+                    <div className="row gap-4px">
+                        {upgrades.map(upgrade => {
+                            if (boughtUpgrades.has(upgrade.id)) {
+                                return <button disabled>{upgrade.name} (BOUGHT)</button>;
+                            }
+
+                            if (!canAfford(money, upgrade.cost)) {
+                                return <button disabled>{upgrade.name} (<CostComponent cost={upgrade.cost} />)</button>;
+                            }
+
+                            return (
+                                <button
+                                    onClick={() => {
+                                        updateMoney(upgrade.cost, 'loss');
+                                        upgrade.onPurchase();
+                                        const newSet = new Set(boughtUpgrades);
+                                        newSet.add(upgrade.id);
+                                        setBoughtUpgrades(newSet);
+                                    }}
+                                >
+                                    {upgrade.name} (<CostComponent cost={upgrade.cost} />)
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
                 {purchaseableTargets.length > 0 && (
                     <div className="column gap-8px">
                         <h3>Targets</h3>

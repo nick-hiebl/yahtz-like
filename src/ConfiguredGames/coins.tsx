@@ -1,7 +1,7 @@
 import { GameStateComponent } from '../GameState';
-import type { MoneyProps, PurchaseableElement, PurchaseableTarget } from '../GameState/types';
+import type { GameProps, PurchaseableElement, PurchaseableTarget } from '../GameState/types';
 import { createCoin } from '../element';
-import type { Cost, Element, Target } from '../types';
+import type { Cost, Element, Target, Upgrade } from '../types';
 import { countSymbol } from '../value-utils';
 
 const AUTOMATION_COST = { rocket: 10 };
@@ -58,9 +58,12 @@ const getPurchaseableTargets = (owned: Element[]): PurchaseableTarget[] => {
     });
 };
 
-export const CoinsGame = ({ money, updateMoney }: MoneyProps) => {
+const EMPTY_LIST: Upgrade[] = [];
+
+export const CoinsGame = ({ money, onGameStateChange: _, updateMoney }: GameProps) => {
     return (
         <GameStateComponent
+            upgrades={EMPTY_LIST}
             getInitialElements={getInitialElements}
             getInitialTargets={getInitialTargets}
             getRerollCost={getRerollCost}

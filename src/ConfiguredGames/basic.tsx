@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
+
 import { GameStateComponent } from '../GameState';
-import type { MoneyProps, PurchaseableElement, PurchaseableTarget } from '../GameState/types';
+import type { GameProps, PurchaseableElement, PurchaseableTarget } from '../GameState/types';
 import { createDice } from '../element';
-import { isNumberValue, type Cost, type Element, type Target } from '../types';
+import { isNumberValue, Upgrade, type Cost, type Element, type Target } from '../types';
 import { countMatchingPredicate, sum } from '../value-utils';
 
 const AUTOMATION_COST = { dollar: 10 };
@@ -67,7 +69,19 @@ const getPurchaseableTargets = (owned: Element[]): PurchaseableTarget[] => {
     });
 };
 
-export const BasicGame = ({ money, updateMoney }: MoneyProps) => {
+export const BasicGame = ({ money, onGameStateChange, updateMoney }: GameProps) => {
+    const upgrades = useMemo<Upgrade[]>(() => {
+        return [
+            {
+                id: 'buy-coins-game',
+                name: 'Buy coins game',
+                cost: { dollar: 50 },
+                onPurchase: () => {
+                    onGameStateChange({ type: 'enable-tab', tabName: 'coin' });
+                },
+            },
+        ];
+    }, [onGameStateChange]);
     return (
         <GameStateComponent
             getInitialElements={getInitialElements}
@@ -79,6 +93,7 @@ export const BasicGame = ({ money, updateMoney }: MoneyProps) => {
             money={money}
             updateMoney={updateMoney}
             automationCost={AUTOMATION_COST}
+            upgrades={upgrades}
         />
     )
 };
